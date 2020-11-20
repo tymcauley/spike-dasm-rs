@@ -25,8 +25,27 @@ mod test {
     use crate::instruction;
     use crate::Xlen;
 
+    fn test_disasm(disasm: Disassembler, test_pairs: Vec<(u32, &str)>) {
+        for (inst_u32, inst_str) in test_pairs.into_iter() {
+            let inst_bits = InstructionBits::new(inst_u32).unwrap_or_else(|e| {
+                panic!(
+                    "Failed to construct InstructionBits from {:0>8x} ({}): {}",
+                    inst_u32, inst_str, e
+                );
+            });
+
+            assert_eq!(
+                disasm.fmt_inst(inst_bits).unwrap_or_else(|| panic!(
+                    "{:?} didn't match any known instruction, from {:0>8x}, '{}'",
+                    inst_bits, inst_u32, inst_str
+                )),
+                inst_str
+            );
+        }
+    }
+
     #[test]
-    fn disasm_rv64() {
+    fn disasm_rv64_simple() {
         let instructions = instruction::gen_instructions(Xlen::Rv64);
         let disasm = Disassembler::new(instructions);
 
@@ -44,15 +63,6 @@ mod test {
             (0x10500073, "wfi    "),
         ];
 
-        for (inst_u32, inst_str) in test_pairs.into_iter() {
-            let inst_bits = InstructionBits::new(inst_u32).unwrap_or_else(|e| {
-                panic!(
-                    "Failed to construct InstructionBits from {:0>8x} ({}): {}",
-                    inst_u32, inst_str, e
-                );
-            });
-
-            assert_eq!(disasm.fmt_inst(inst_bits).unwrap(), inst_str);
-        }
+        test_disasm(disasm, test_pairs);
     }
 }
