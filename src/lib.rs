@@ -1,3 +1,4 @@
+pub mod csrs;
 pub mod disasm;
 #[allow(dead_code)]
 pub mod inst;
