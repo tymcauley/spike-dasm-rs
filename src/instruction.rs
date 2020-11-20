@@ -1,5 +1,6 @@
 use std::fmt;
 
+use super::csrs;
 use super::inst;
 use super::registers::INT_REGISTER_ABI_NAMES;
 use super::Xlen;
@@ -101,12 +102,20 @@ impl InstructionBits {
         (imm_4_1 + imm_10_5 + imm_11 + imm_12) as i32
     }
 
+    pub fn get_uimm5(&self) -> u32 {
+        self.shift_and_mask(15, 5)
+    }
+
     pub fn get_shamt(&self) -> u32 {
         // On RV32 and for the various word-size shifts on RV64 (SLLIW, etc), the shift-amount is a
         // 5-bit number, while it's a 6-bit number for the normal RV64 shift instructions. However,
         // for all of the 5-bit-shift-amount cases, the most-significant-bit is always encoded as a
         // 0. So, we can always use a 6-bit shift-amount.
         self.shift_and_mask(20, 6)
+    }
+
+    pub fn get_csr(&self) -> u32 {
+        self.shift_and_mask(20, 12)
     }
 }
 
@@ -258,6 +267,30 @@ fn fmt_no_args(inst_filter: &InstructionFilter, _inst_bits: InstructionBits) -> 
     format!("{}", inst_filter)
 }
 
+fn fmt_csr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let csr_index = inst_bits.get_csr();
+    let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
+    format!(
+        "{} {}, {}, {}",
+        inst_filter,
+        inst_bits.get_rd(),
+        csr_str,
+        inst_bits.get_rs1()
+    )
+}
+
+fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let csr_index = inst_bits.get_csr();
+    let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
+    format!(
+        "{} {}, {}, {}",
+        inst_filter,
+        inst_bits.get_rd(),
+        csr_str,
+        inst_bits.get_uimm5()
+    )
+}
+
 /// Returns a list of `InstructionFilter` objects to use in the disassembler.
 pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
     // TODO: Fill this out, include extensions.
@@ -354,7 +387,12 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
         InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
         // Control and Status Registers, Zicsr extension
-        // TODO
+        InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
+        InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),
+        InstructionFilter::new("csrrc", inst::MASK_CSRRC, inst::MATCH_CSRRC, fmt_csr),
+        InstructionFilter::new("csrrwi", inst::MASK_CSRRWI, inst::MATCH_CSRRWI, fmt_csr_imm),
+        InstructionFilter::new("csrrsi", inst::MASK_CSRRSI, inst::MATCH_CSRRSI, fmt_csr_imm),
+        InstructionFilter::new("csrrci", inst::MASK_CSRRCI, inst::MATCH_CSRRCI, fmt_csr_imm),
     ]
 }
 

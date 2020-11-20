@@ -65,4 +65,21 @@ mod test {
 
         test_disasm(disasm, test_pairs);
     }
+
+    #[test]
+    fn disasm_rv64_csr() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0x18031573, "csrrw   a0, satp, t1"),
+            (0x18032573, "csrrs   a0, satp, t1"),
+            (0x18033573, "csrrc   a0, satp, t1"),
+            (0x18035573, "csrrwi  a0, satp, 6"),
+            (0x18036573, "csrrsi  a0, satp, 6"),
+            (0x18037573, "csrrci  a0, satp, 6"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
 }
