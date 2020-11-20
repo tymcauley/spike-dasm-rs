@@ -2,3 +2,4 @@
 pub mod inst;
 pub mod io;
 pub mod parser;
+pub mod registers;
