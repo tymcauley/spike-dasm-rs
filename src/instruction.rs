@@ -217,7 +217,7 @@ fn fmt_j_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     };
     let jump_immediate_pos = jump_immediate.abs();
     format!(
-        "{} {}, pc {} {}",
+        "{} {}, pc {} {:#x}",
         inst_filter,
         inst_bits.get_rd(),
         operator,
