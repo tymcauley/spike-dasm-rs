@@ -122,4 +122,28 @@ mod test {
 
         test_disasm(disasm, test_pairs);
     }
+
+    #[test]
+    fn disasm_rv64_m() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0x02208733, "mul     a4, ra, sp"),
+            (0x02101133, "mulh    sp, zero, ra"),
+            (0x0220b733, "mulhu   a4, ra, sp"),
+            (0x0220a733, "mulhsu  a4, ra, sp"),
+            (0x03678b3b, "mulw    s6, a5, s6"),
+            (0x0220c733, "div     a4, ra, sp"),
+            (0x03b4ddb3, "divu    s11, s1, s11"),
+            (0x0220e733, "rem     a4, ra, sp"),
+            (0x02e7f9b3, "remu    s3, a5, a4"),
+            (0x037b473b, "divw    a4, s6, s7"),
+            (0x0220d73b, "divuw   a4, ra, sp"),
+            (0x0220e73b, "remw    a4, ra, sp"),
+            (0x0220f73b, "remuw   a4, ra, sp"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
 }

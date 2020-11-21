@@ -378,21 +378,35 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
             inst::MATCH_FENCE_I,
             fmt_no_args,
         ),
-        // Environment Calls & Breakpoints
+        // Environment calls & breakpoints
         InstructionFilter::new("ecall", inst::MASK_ECALL, inst::MATCH_ECALL, fmt_no_args),
         InstructionFilter::new("ebreak", inst::MASK_EBREAK, inst::MATCH_EBREAK, fmt_no_args),
-        // Privileged Instructions
+        // Privileged instructions
         InstructionFilter::new("wfi", inst::MASK_WFI, inst::MATCH_WFI, fmt_no_args),
         InstructionFilter::new("mret", inst::MASK_MRET, inst::MATCH_MRET, fmt_no_args),
         InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
         InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
-        // Control and Status Registers, Zicsr extension
+        // Control and status registers, Zicsr extension
         InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
         InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),
         InstructionFilter::new("csrrc", inst::MASK_CSRRC, inst::MATCH_CSRRC, fmt_csr),
         InstructionFilter::new("csrrwi", inst::MASK_CSRRWI, inst::MATCH_CSRRWI, fmt_csr_imm),
         InstructionFilter::new("csrrsi", inst::MASK_CSRRSI, inst::MATCH_CSRRSI, fmt_csr_imm),
         InstructionFilter::new("csrrci", inst::MASK_CSRRCI, inst::MATCH_CSRRCI, fmt_csr_imm),
+        // M extension, integer multiplication and division
+        InstructionFilter::new("mul", inst::MASK_MUL, inst::MATCH_MUL, fmt_r_type),
+        InstructionFilter::new("mulh", inst::MASK_MULH, inst::MATCH_MULH, fmt_r_type),
+        InstructionFilter::new("mulhu", inst::MASK_MULHU, inst::MATCH_MULHU, fmt_r_type),
+        InstructionFilter::new("mulhsu", inst::MASK_MULHSU, inst::MATCH_MULHSU, fmt_r_type),
+        InstructionFilter::new("mulw", inst::MASK_MULW, inst::MATCH_MULW, fmt_r_type),
+        InstructionFilter::new("div", inst::MASK_DIV, inst::MATCH_DIV, fmt_r_type),
+        InstructionFilter::new("divu", inst::MASK_DIVU, inst::MATCH_DIVU, fmt_r_type),
+        InstructionFilter::new("rem", inst::MASK_REM, inst::MATCH_REM, fmt_r_type),
+        InstructionFilter::new("remu", inst::MASK_REMU, inst::MATCH_REMU, fmt_r_type),
+        InstructionFilter::new("divw", inst::MASK_DIVW, inst::MATCH_DIVW, fmt_r_type),
+        InstructionFilter::new("divuw", inst::MASK_DIVUW, inst::MATCH_DIVUW, fmt_r_type),
+        InstructionFilter::new("remw", inst::MASK_REMW, inst::MATCH_REMW, fmt_r_type),
+        InstructionFilter::new("remuw", inst::MASK_REMUW, inst::MATCH_REMUW, fmt_r_type),
     ]
 }
 
