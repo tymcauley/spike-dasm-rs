@@ -159,6 +159,7 @@ mod test {
             (0xfff74813, "not     a6, a4"),
             (0x0005851b, "sext.w  a0, a1"),
             (0x0017b793, "seqz    a5, a5"),
+            (0x00103133, "snez    sp, ra"),
             (0xffdff06f, "j       pc - 0x4"),
             (0x04c0006f, "j       pc + 0x4c"),
             (0x7ea0106f, "j       pc + 0x17ea"),

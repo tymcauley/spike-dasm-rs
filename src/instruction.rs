@@ -230,6 +230,15 @@ fn fmt_r_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     )
 }
 
+fn fmt_r_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_rd(),
+        inst_bits.get_rs2()
+    )
+}
+
 fn fmt_j_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let jump_immediate = inst_bits.get_j_imm();
     let operator = if jump_immediate.is_negative() {
@@ -424,6 +433,14 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("lui", inst::MASK_LUI, inst::MATCH_LUI, fmt_u_type),
         InstructionFilter::new("auipc", inst::MASK_AUIPC, inst::MATCH_AUIPC, fmt_u_type),
         // Register-register
+        //  - pseudo instructions
+        InstructionFilter::new(
+            "snez",
+            inst::MASK_SLTU | registers::MASK_RS1,
+            inst::MATCH_SLTU,
+            fmt_r_type_no_rs1,
+        ),
+        //  - standard
         InstructionFilter::new("add", inst::MASK_ADD, inst::MATCH_ADD, fmt_r_type),
         InstructionFilter::new("slt", inst::MASK_SLT, inst::MATCH_SLT, fmt_r_type),
         InstructionFilter::new("sltu", inst::MASK_SLTU, inst::MATCH_SLTU, fmt_r_type),
