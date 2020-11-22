@@ -193,6 +193,24 @@ fn fmt_i_type_just_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBi
     format!("{} {}", inst_filter, inst_bits.get_rs1(),)
 }
 
+fn fmt_i_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_rd(),
+        inst_bits.get_i_imm(),
+    )
+}
+
+fn fmt_i_type_no_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_rd(),
+        inst_bits.get_rs1(),
+    )
+}
+
 fn fmt_u_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
         "{} {}, {:#x}",
@@ -331,6 +349,44 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
 
     vec![
         // Integer-immediate
+        //  - pseudo instructions
+        InstructionFilter::new(
+            "nop",
+            inst::MASK_ADDI | registers::MASK_RD | registers::MASK_RS1 | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_ADDI,
+            fmt_no_args,
+        ),
+        InstructionFilter::new(
+            "li",
+            inst::MASK_ADDI | registers::MASK_RS1,
+            inst::MATCH_ADDI,
+            fmt_i_type_no_rs1,
+        ),
+        InstructionFilter::new(
+            "mv",
+            inst::MASK_ADDI | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_ADDI,
+            fmt_i_type_no_imm,
+        ),
+        InstructionFilter::new(
+            "not",
+            inst::MASK_XORI | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_XORI | registers::MATCH_I_TYPE_IMM_EQUALS_NEG1,
+            fmt_i_type_no_imm,
+        ),
+        InstructionFilter::new(
+            "sext.w",
+            inst::MASK_ADDIW | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_ADDIW,
+            fmt_i_type_no_imm,
+        ),
+        InstructionFilter::new(
+            "seqz",
+            inst::MASK_SLTIU | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_SLTIU | registers::MATCH_I_TYPE_IMM_EQUALS_1,
+            fmt_i_type_no_imm,
+        ),
+        //  - standard
         InstructionFilter::new("addi", inst::MASK_ADDI, inst::MATCH_ADDI, fmt_i_type),
         InstructionFilter::new("slti", inst::MASK_SLTI, inst::MATCH_SLTI, fmt_i_type),
         InstructionFilter::new("sltiu", inst::MASK_SLTIU, inst::MATCH_SLTIU, fmt_i_type),

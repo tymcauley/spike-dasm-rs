@@ -153,6 +153,12 @@ mod test {
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
+            (0x00000013, "nop    "),
+            (0x00300193, "li      gp, 3"),
+            (0x00010513, "mv      a0, sp"),
+            (0xfff74813, "not     a6, a4"),
+            (0x0005851b, "sext.w  a0, a1"),
+            (0x0017b793, "seqz    a5, a5"),
             (0xffdff06f, "j       pc - 0x4"),
             (0x04c0006f, "j       pc + 0x4c"),
             (0x7ea0106f, "j       pc + 0x17ea"),

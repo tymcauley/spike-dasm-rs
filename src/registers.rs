@@ -36,3 +36,5 @@ pub(crate) const MASK_I_TYPE_IMM: u32 = gen_mask(20, 12);
 
 pub(crate) const MATCH_RD_EQUALS_RA: u32 = 1 << 7;
 pub(crate) const MATCH_RS1_EQUALS_RA: u32 = 1 << 15;
+pub(crate) const MATCH_I_TYPE_IMM_EQUALS_NEG1: u32 = gen_mask(20, 12);
+pub(crate) const MATCH_I_TYPE_IMM_EQUALS_1: u32 = 1 << 20;
