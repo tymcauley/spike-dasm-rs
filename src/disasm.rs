@@ -172,6 +172,13 @@ mod test {
             (0xfe0816e3, "bnez    a6, pc - 20"),
             (0x0e09c563, "bltz    s3, pc + 234"),
             (0x0002d863, "bgez    t0, pc + 16"),
+            (0x300027f3, "csrr    a5, mstatus"),
+            (0x3b061073, "csrw    pmpaddr0, a2"),
+            (0x3412a073, "csrs    mepc, t0"),
+            (0x30063073, "csrc    mstatus, a2"),
+            (0x30415073, "csrwi   mie, 2"),
+            (0x30046073, "csrsi   mstatus, 8"),
+            (0x30127073, "csrci   misa, 4"),
         ];
 
         test_disasm(disasm, test_pairs);

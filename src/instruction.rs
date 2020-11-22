@@ -338,6 +338,18 @@ fn fmt_csr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Strin
     )
 }
 
+fn fmt_csr_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let csr_index = inst_bits.get_csr();
+    let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
+    format!("{} {}, {}", inst_filter, inst_bits.get_rd(), csr_str)
+}
+
+fn fmt_csr_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let csr_index = inst_bits.get_csr();
+    let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
+    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_rs1())
+}
+
 fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
@@ -348,6 +360,12 @@ fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> S
         csr_str,
         inst_bits.get_uimm5()
     )
+}
+
+fn fmt_csr_imm_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let csr_index = inst_bits.get_csr();
+    let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
+    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_uimm5())
 }
 
 /// Returns a list of `InstructionFilter` objects to use in the disassembler.
@@ -550,6 +568,50 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
         InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
         // Control and status registers, Zicsr extension
+        //  - pseudo instructions
+        InstructionFilter::new(
+            "csrr",
+            inst::MASK_CSRRS | registers::MASK_RS1,
+            inst::MATCH_CSRRS,
+            fmt_csr_no_rs1,
+        ),
+        InstructionFilter::new(
+            "csrw",
+            inst::MASK_CSRRW | registers::MASK_RD,
+            inst::MATCH_CSRRW,
+            fmt_csr_no_rd,
+        ),
+        InstructionFilter::new(
+            "csrs",
+            inst::MASK_CSRRS | registers::MASK_RD,
+            inst::MATCH_CSRRS,
+            fmt_csr_no_rd,
+        ),
+        InstructionFilter::new(
+            "csrc",
+            inst::MASK_CSRRC | registers::MASK_RD,
+            inst::MATCH_CSRRC,
+            fmt_csr_no_rd,
+        ),
+        InstructionFilter::new(
+            "csrwi",
+            inst::MASK_CSRRWI | registers::MASK_RD,
+            inst::MATCH_CSRRWI,
+            fmt_csr_imm_no_rd,
+        ),
+        InstructionFilter::new(
+            "csrsi",
+            inst::MASK_CSRRSI | registers::MASK_RD,
+            inst::MATCH_CSRRSI,
+            fmt_csr_imm_no_rd,
+        ),
+        InstructionFilter::new(
+            "csrci",
+            inst::MASK_CSRRCI | registers::MASK_RD,
+            inst::MATCH_CSRRCI,
+            fmt_csr_imm_no_rd,
+        ),
+        //  - standard
         InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
         InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),
         InstructionFilter::new("csrrc", inst::MASK_CSRRC, inst::MATCH_CSRRC, fmt_csr),
