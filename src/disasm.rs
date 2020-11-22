@@ -146,4 +146,23 @@ mod test {
 
         test_disasm(disasm, test_pairs);
     }
+
+    #[test]
+    fn disasm_rv64_pseudo_instructions() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0xffdff06f, "j       pc - 0x4"),
+            (0x04c0006f, "j       pc + 0x4c"),
+            (0x7ea0106f, "j       pc + 0x17ea"),
+            (0x269020ef, "jal     pc + 0x2a68"),
+            (0xe48ff0ef, "jal     pc - 0x9b8"),
+            (0x00008067, "ret    "),
+            (0x000f0067, "jr      t5"),
+            (0x000300e7, "jalr    t1"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
 }

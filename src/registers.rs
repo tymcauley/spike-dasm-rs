@@ -23,3 +23,15 @@ pub const FP_REGISTER_ABI_NAMES: [&'static str; 32] = [
     "fa3", "fa4", "fa5", "fa6", "fa7", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7", "fs8", "fs9",
     "fs10", "fs11", "ft8", "ft9", "ft10", "ft11",
 ];
+
+const fn gen_mask(offset: u8, mask_width: u8) -> u32 {
+    let mask = (1 << mask_width) - 1;
+    mask << offset
+}
+
+pub(crate) const MASK_RD: u32 = gen_mask(7, 5);
+pub(crate) const MASK_RS1: u32 = gen_mask(15, 5);
+pub(crate) const MASK_I_TYPE_IMM: u32 = gen_mask(20, 12);
+
+pub(crate) const MATCH_RD_EQUALS_RA: u32 = 1 << 7;
+pub(crate) const MATCH_RS1_EQUALS_RA: u32 = 1 << 15;

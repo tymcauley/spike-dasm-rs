@@ -2,7 +2,7 @@ use std::fmt;
 
 use super::csrs;
 use super::inst;
-use super::registers::INT_REGISTER_ABI_NAMES;
+use super::registers::{self, INT_REGISTER_ABI_NAMES};
 use super::Xlen;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -189,6 +189,10 @@ fn fmt_i_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits)
     )
 }
 
+fn fmt_i_type_just_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!("{} {}", inst_filter, inst_bits.get_rs1(),)
+}
+
 fn fmt_u_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
         "{} {}, {:#x}",
@@ -223,6 +227,17 @@ fn fmt_j_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
         operator,
         jump_immediate_pos
     )
+}
+
+fn fmt_j_type_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let jump_immediate = inst_bits.get_j_imm();
+    let operator = if jump_immediate.is_negative() {
+        '-'
+    } else {
+        '+'
+    };
+    let jump_immediate_pos = jump_immediate.abs();
+    format!("{} pc {} {:#x}", inst_filter, operator, jump_immediate_pos)
 }
 
 fn fmt_b_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
@@ -347,6 +362,38 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("sub", inst::MASK_SUB, inst::MATCH_SUB, fmt_r_type),
         InstructionFilter::new("sra", inst::MASK_SRA, inst::MATCH_SRA, fmt_r_type),
         // Jumps
+        //  - pseudo instructions
+        InstructionFilter::new(
+            "j",
+            inst::MASK_JAL | registers::MASK_RD,
+            inst::MATCH_JAL,
+            fmt_j_type_no_rd,
+        ),
+        InstructionFilter::new(
+            "jal",
+            inst::MASK_JAL | registers::MASK_RD,
+            inst::MATCH_JAL | registers::MATCH_RD_EQUALS_RA,
+            fmt_j_type_no_rd,
+        ),
+        InstructionFilter::new(
+            "ret",
+            inst::MASK_JALR | registers::MASK_RD | registers::MASK_RS1 | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_JALR | registers::MATCH_RS1_EQUALS_RA,
+            fmt_no_args,
+        ),
+        InstructionFilter::new(
+            "jr",
+            inst::MASK_JALR | registers::MASK_RD | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_JALR,
+            fmt_i_type_just_rs1,
+        ),
+        InstructionFilter::new(
+            "jalr",
+            inst::MASK_JALR | registers::MASK_RD | registers::MASK_I_TYPE_IMM,
+            inst::MATCH_JALR | registers::MATCH_RD_EQUALS_RA,
+            fmt_i_type_just_rs1,
+        ),
+        //  - standard
         InstructionFilter::new("jal", inst::MASK_JAL, inst::MATCH_JAL, fmt_j_type),
         InstructionFilter::new("jalr", inst::MASK_JALR, inst::MATCH_JALR, fmt_i_type),
         // Branches
