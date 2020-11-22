@@ -258,6 +258,23 @@ fn fmt_b_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     )
 }
 
+fn fmt_b_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let branch_immediate = inst_bits.get_b_imm();
+    let operator = if branch_immediate.is_negative() {
+        '-'
+    } else {
+        '+'
+    };
+    let branch_immediate_pos = branch_immediate.abs();
+    format!(
+        "{} {}, pc {} {}",
+        inst_filter,
+        inst_bits.get_rs1(),
+        operator,
+        branch_immediate_pos
+    )
+}
+
 fn fmt_load(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
         "{} {}, {}({})",
@@ -397,6 +414,32 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("jal", inst::MASK_JAL, inst::MATCH_JAL, fmt_j_type),
         InstructionFilter::new("jalr", inst::MASK_JALR, inst::MATCH_JALR, fmt_i_type),
         // Branches
+        //  - pseudo instructions
+        InstructionFilter::new(
+            "beqz",
+            inst::MASK_BEQ | registers::MASK_RS2,
+            inst::MATCH_BEQ,
+            fmt_b_type_no_rs2,
+        ),
+        InstructionFilter::new(
+            "bnez",
+            inst::MASK_BNE | registers::MASK_RS2,
+            inst::MATCH_BNE,
+            fmt_b_type_no_rs2,
+        ),
+        InstructionFilter::new(
+            "bltz",
+            inst::MASK_BLT | registers::MASK_RS2,
+            inst::MATCH_BLT,
+            fmt_b_type_no_rs2,
+        ),
+        InstructionFilter::new(
+            "bgez",
+            inst::MASK_BGE | registers::MASK_RS2,
+            inst::MATCH_BGE,
+            fmt_b_type_no_rs2,
+        ),
+        //  - standard
         InstructionFilter::new("beq", inst::MASK_BEQ, inst::MATCH_BEQ, fmt_b_type),
         InstructionFilter::new("bne", inst::MASK_BNE, inst::MATCH_BNE, fmt_b_type),
         InstructionFilter::new("blt", inst::MASK_BLT, inst::MATCH_BLT, fmt_b_type),

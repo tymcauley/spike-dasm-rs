@@ -161,6 +161,10 @@ mod test {
             (0x00008067, "ret    "),
             (0x000f0067, "jr      t5"),
             (0x000300e7, "jalr    t1"),
+            (0x00050463, "beqz    a0, pc + 8"),
+            (0xfe0816e3, "bnez    a6, pc - 20"),
+            (0x0e09c563, "bltz    s3, pc + 234"),
+            (0x0002d863, "bgez    t0, pc + 16"),
         ];
 
         test_disasm(disasm, test_pairs);

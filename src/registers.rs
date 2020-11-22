@@ -31,6 +31,7 @@ const fn gen_mask(offset: u8, mask_width: u8) -> u32 {
 
 pub(crate) const MASK_RD: u32 = gen_mask(7, 5);
 pub(crate) const MASK_RS1: u32 = gen_mask(15, 5);
+pub(crate) const MASK_RS2: u32 = gen_mask(20, 5);
 pub(crate) const MASK_I_TYPE_IMM: u32 = gen_mask(20, 12);
 
 pub(crate) const MATCH_RD_EQUALS_RA: u32 = 1 << 7;
