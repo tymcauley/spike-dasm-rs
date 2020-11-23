@@ -263,4 +263,48 @@ mod test {
 
         test_disasm(disasm, test_pairs);
     }
+
+    #[test]
+    fn disasm_rv64_d() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0x01053107, "fld     ft2, 16(a0)"),
+            (0x00233427, "fsd     ft2, 8(t1)"),
+            (0x02e7f7d3, "fadd.d  fa5, fa5, fa4"),
+            (0x0af67753, "fsub.d  fa4, fa2, fa5"),
+            (0x12a7f7d3, "fmul.d  fa5, fa5, fa0"),
+            (0x1a1071d3, "fdiv.d  ft3, ft0, ft1"),
+            (0x5a0071d3, "fsqrt.d ft3, ft0"),
+            (0x2a1001d3, "fmin.d  ft3, ft0, ft1"),
+            (0x2a1011d3, "fmax.d  ft3, ft0, ft1"),
+            (0x7ae6f7c3, "fmadd.d fa5, fa3, fa4, fa5"),
+            (0x121071cf, "fnmadd.d ft3, ft0, ft1, ft2"),
+            (0x121071c7, "fmsub.d ft3, ft0, ft1, ft2"),
+            (0x121071cb, "fnmsub.d ft3, ft0, ft1, ft2"),
+            (0xd20500d3, "fcvt.d.w ft1, a0"),
+            (0xd2000053, "fcvt.d.w ft0, zero"),
+            (0xd227f7d3, "fcvt.d.l fa5, a5"),
+            (0xd2150053, "fcvt.d.wu ft0, a0"),
+            (0xd2357053, "fcvt.d.lu ft0, a0"),
+            (0xc200f0d3, "fcvt.w.d ra, ft1"),
+            (0xc2201553, "fcvt.l.d a0, ft0"),
+            (0xc2101553, "fcvt.wu.d a0, ft0"),
+            (0xc2301553, "fcvt.lu.d a0, ft0"),
+            (0x4011f1d3, "fcvt.s.d ft3, ft3"),
+            (0x420001d3, "fcvt.d.s ft3, ft0"),
+            (0x22208053, "fsgnj.d ft0, ft1, ft2"),
+            (0x22209053, "fsgnjn.d ft0, ft1, ft2"),
+            (0x22d6a6d3, "fsgnjx.d fa3, fa3, fa3"),
+            (0xe2018553, "fmv.x.d a0, ft3"),
+            (0xf20580d3, "fmv.d.x ft1, a1"),
+            (0xa2102553, "feq.d   a0, ft0, ft1"),
+            (0xa2101553, "flt.d   a0, ft0, ft1"),
+            (0xa2100553, "fle.d   a0, ft0, ft1"),
+            (0xe2051553, "fclass.d a0, fa0"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
 }
