@@ -368,6 +368,25 @@ fn fmt_csr_imm_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits
     format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_uimm5())
 }
 
+fn fmt_amo_lr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, ({})",
+        inst_filter,
+        inst_bits.get_rd(),
+        inst_bits.get_rs1()
+    )
+}
+
+fn fmt_amo(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}, ({})",
+        inst_filter,
+        inst_bits.get_rd(),
+        inst_bits.get_rs2(),
+        inst_bits.get_rs1()
+    )
+}
+
 /// Returns a list of `InstructionFilter` objects to use in the disassembler.
 pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
     // TODO: Fill this out, include extensions.
@@ -632,6 +651,109 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
         InstructionFilter::new("divuw", inst::MASK_DIVUW, inst::MATCH_DIVUW, fmt_r_type),
         InstructionFilter::new("remw", inst::MASK_REMW, inst::MATCH_REMW, fmt_r_type),
         InstructionFilter::new("remuw", inst::MASK_REMUW, inst::MATCH_REMUW, fmt_r_type),
+        // A extension, atomic instructions
+        InstructionFilter::new("lr.w", inst::MASK_LR_W, inst::MATCH_LR_W, fmt_amo_lr),
+        InstructionFilter::new("sc.w", inst::MASK_SC_W, inst::MATCH_SC_W, fmt_amo),
+        InstructionFilter::new("lr.d", inst::MASK_LR_D, inst::MATCH_LR_D, fmt_amo_lr),
+        InstructionFilter::new("sc.d", inst::MASK_SC_D, inst::MATCH_SC_D, fmt_amo),
+        InstructionFilter::new(
+            "amoswap.w",
+            inst::MASK_AMOSWAP_W,
+            inst::MATCH_AMOSWAP_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoswap.d",
+            inst::MASK_AMOSWAP_D,
+            inst::MATCH_AMOSWAP_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoadd.w",
+            inst::MASK_AMOADD_W,
+            inst::MATCH_AMOADD_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoadd.d",
+            inst::MASK_AMOADD_D,
+            inst::MATCH_AMOADD_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoand.w",
+            inst::MASK_AMOAND_W,
+            inst::MATCH_AMOAND_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoand.d",
+            inst::MASK_AMOAND_D,
+            inst::MATCH_AMOAND_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new("amoor.w", inst::MASK_AMOOR_W, inst::MATCH_AMOOR_W, fmt_amo),
+        InstructionFilter::new("amoor.d", inst::MASK_AMOOR_D, inst::MATCH_AMOOR_D, fmt_amo),
+        InstructionFilter::new(
+            "amoxor.w",
+            inst::MASK_AMOXOR_W,
+            inst::MATCH_AMOXOR_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amoxor.d",
+            inst::MASK_AMOXOR_D,
+            inst::MATCH_AMOXOR_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomax.w",
+            inst::MASK_AMOMAX_W,
+            inst::MATCH_AMOMAX_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomax.d",
+            inst::MASK_AMOMAX_D,
+            inst::MATCH_AMOMAX_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomaxu.w",
+            inst::MASK_AMOMAXU_W,
+            inst::MATCH_AMOMAXU_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomaxu.d",
+            inst::MASK_AMOMAXU_D,
+            inst::MATCH_AMOMAXU_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomin.w",
+            inst::MASK_AMOMIN_W,
+            inst::MATCH_AMOMIN_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amomin.d",
+            inst::MASK_AMOMIN_D,
+            inst::MATCH_AMOMIN_D,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amominu.w",
+            inst::MASK_AMOMINU_W,
+            inst::MATCH_AMOMINU_W,
+            fmt_amo,
+        ),
+        InstructionFilter::new(
+            "amominu.d",
+            inst::MASK_AMOMINU_D,
+            inst::MATCH_AMOMINU_D,
+            fmt_amo,
+        ),
     ]
 }
 

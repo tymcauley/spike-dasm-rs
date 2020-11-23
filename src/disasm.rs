@@ -124,30 +124,6 @@ mod test {
     }
 
     #[test]
-    fn disasm_rv64_m() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
-        let disasm = Disassembler::new(instructions);
-
-        let test_pairs = vec![
-            (0x02208733, "mul     a4, ra, sp"),
-            (0x02101133, "mulh    sp, zero, ra"),
-            (0x0220b733, "mulhu   a4, ra, sp"),
-            (0x0220a733, "mulhsu  a4, ra, sp"),
-            (0x03678b3b, "mulw    s6, a5, s6"),
-            (0x0220c733, "div     a4, ra, sp"),
-            (0x03b4ddb3, "divu    s11, s1, s11"),
-            (0x0220e733, "rem     a4, ra, sp"),
-            (0x02e7f9b3, "remu    s3, a5, a4"),
-            (0x037b473b, "divw    a4, s6, s7"),
-            (0x0220d73b, "divuw   a4, ra, sp"),
-            (0x0220e73b, "remw    a4, ra, sp"),
-            (0x0220f73b, "remuw   a4, ra, sp"),
-        ];
-
-        test_disasm(disasm, test_pairs);
-    }
-
-    #[test]
     fn disasm_rv64_pseudo_instructions() {
         let instructions = instruction::gen_instructions(Xlen::Rv64);
         let disasm = Disassembler::new(instructions);
@@ -179,6 +155,63 @@ mod test {
             (0x30415073, "csrwi   mie, 2"),
             (0x30046073, "csrsi   mstatus, 8"),
             (0x30127073, "csrci   misa, 4"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
+
+    #[test]
+    fn disasm_rv64_m() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0x02208733, "mul     a4, ra, sp"),
+            (0x02101133, "mulh    sp, zero, ra"),
+            (0x0220b733, "mulhu   a4, ra, sp"),
+            (0x0220a733, "mulhsu  a4, ra, sp"),
+            (0x03678b3b, "mulw    s6, a5, s6"),
+            (0x0220c733, "div     a4, ra, sp"),
+            (0x03b4ddb3, "divu    s11, s1, s11"),
+            (0x0220e733, "rem     a4, ra, sp"),
+            (0x02e7f9b3, "remu    s3, a5, a4"),
+            (0x037b473b, "divw    a4, s6, s7"),
+            (0x0220d73b, "divuw   a4, ra, sp"),
+            (0x0220e73b, "remw    a4, ra, sp"),
+            (0x0220f73b, "remuw   a4, ra, sp"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
+
+    #[test]
+    fn disasm_rv64_a() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0x1005272f, "lr.w    a4, (a0)"),
+            (0x1005372f, "lr.d    a4, (a0)"),
+            (0x18e5272f, "sc.w    a4, a4, (a0)"),
+            (0x18e5372f, "sc.d    a4, a4, (a0)"),
+            (0x08b6a72f, "amoswap.w a4, a1, (a3)"),
+            (0x08b6b72f, "amoswap.d a4, a1, (a3)"),
+            (0x00b5262f, "amoadd.w a2, a1, (a0)"),
+            (0x00b6b72f, "amoadd.d a4, a1, (a3)"),
+            (0x60b6a72f, "amoand.w a4, a1, (a3)"),
+            (0x60b6b72f, "amoand.d a4, a1, (a3)"),
+            (0x40b6a72f, "amoor.w a4, a1, (a3)"),
+            (0x40b6b72f, "amoor.d a4, a1, (a3)"),
+            (0x20b6a72f, "amoxor.w a4, a1, (a3)"),
+            (0x20b6b72f, "amoxor.d a4, a1, (a3)"),
+            (0xa0b6a72f, "amomax.w a4, a1, (a3)"),
+            (0xa0b6b72f, "amomax.d a4, a1, (a3)"),
+            (0xe0b6a72f, "amomaxu.w a4, a1, (a3)"),
+            (0xe0b6b72f, "amomaxu.d a4, a1, (a3)"),
+            (0x80b6a72f, "amomin.w a4, a1, (a3)"),
+            (0x80b6b72f, "amomin.d a4, a1, (a3)"),
+            (0xc0b6a72f, "amominu.w a4, a1, (a3)"),
+            (0xc0b6b72f, "amominu.d a4, a1, (a3)"),
         ];
 
         test_disasm(disasm, test_pairs);
