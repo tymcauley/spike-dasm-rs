@@ -23,7 +23,7 @@ impl Disassembler {
 mod test {
     use super::*;
     use crate::instruction;
-    use crate::Xlen;
+    use crate::{Extensions, Xlen};
 
     fn test_disasm(disasm: Disassembler, test_pairs: Vec<(u32, &str)>) {
         for (inst_u32, inst_str) in test_pairs.into_iter() {
@@ -46,7 +46,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_simple() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -108,7 +108,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_csr() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -125,7 +125,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_pseudo_instructions() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -162,7 +162,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_m() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -186,7 +186,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_a() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -219,7 +219,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_f() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
@@ -266,7 +266,7 @@ mod test {
 
     #[test]
     fn disasm_rv64_d() {
-        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![

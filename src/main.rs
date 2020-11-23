@@ -2,10 +2,10 @@ use std::io::{self, BufWriter};
 
 use spike_dasm_rs::disasm::Disassembler;
 use spike_dasm_rs::instruction;
-use spike_dasm_rs::Xlen;
+use spike_dasm_rs::{Extensions, Xlen};
 
 fn main() {
-    let instructions = instruction::gen_instructions(Xlen::Rv64);
+    let instructions = instruction::gen_instructions(Xlen::Rv64, Extensions::IMAFDC, true);
     let disasm = Disassembler::new(instructions);
 
     // Lock stdin and stdout to improve repeated read/write performance.
