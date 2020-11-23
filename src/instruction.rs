@@ -53,19 +53,28 @@ impl InstructionBits {
         (signed_bits << (32 - sign_extend_shift) >> (32 - mask_width)) as u32
     }
 
-    pub fn get_rd(&self) -> &str {
-        let idx = self.shift_and_mask(7, 5);
-        INT_REGISTER_ABI_NAMES[idx as usize]
+    fn get_rd(&self) -> u32 {
+        self.shift_and_mask(7, 5)
     }
 
-    pub fn get_rs1(&self) -> &str {
-        let idx = self.shift_and_mask(15, 5);
-        INT_REGISTER_ABI_NAMES[idx as usize]
+    fn get_rs1(&self) -> u32 {
+        self.shift_and_mask(15, 5)
     }
 
-    pub fn get_rs2(&self) -> &str {
-        let idx = self.shift_and_mask(20, 5);
-        INT_REGISTER_ABI_NAMES[idx as usize]
+    fn get_rs2(&self) -> u32 {
+        self.shift_and_mask(20, 5)
+    }
+
+    pub fn get_x_rd(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[self.get_rd() as usize]
+    }
+
+    pub fn get_x_rs1(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[self.get_rs1() as usize]
+    }
+
+    pub fn get_x_rs2(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[self.get_rs2() as usize]
     }
 
     pub fn get_i_imm(&self) -> i32 {
@@ -173,8 +182,8 @@ fn fmt_i_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs1(),
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs1(),
         inst_bits.get_i_imm()
     )
 }
@@ -183,22 +192,22 @@ fn fmt_i_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits)
     format!(
         "{} {}, {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs1(),
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs1(),
         inst_bits.get_shamt()
     )
 }
 
 fn fmt_i_type_just_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
-    format!("{} {}", inst_filter, inst_bits.get_rs1(),)
+    format!("{} {}", inst_filter, inst_bits.get_x_rs1())
 }
 
 fn fmt_i_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
         "{} {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_i_imm(),
+        inst_bits.get_x_rd(),
+        inst_bits.get_i_imm()
     )
 }
 
@@ -206,8 +215,8 @@ fn fmt_i_type_no_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits
     format!(
         "{} {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs1(),
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs1()
     )
 }
 
@@ -215,7 +224,7 @@ fn fmt_u_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, {:#x}",
         inst_filter,
-        inst_bits.get_rd(),
+        inst_bits.get_x_rd(),
         inst_bits.get_big_imm()
     )
 }
@@ -224,9 +233,9 @@ fn fmt_r_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs1(),
-        inst_bits.get_rs2()
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs1(),
+        inst_bits.get_x_rs2()
     )
 }
 
@@ -234,8 +243,8 @@ fn fmt_r_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits
     format!(
         "{} {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs2()
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs2()
     )
 }
 
@@ -250,7 +259,7 @@ fn fmt_j_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, pc {} {:#x}",
         inst_filter,
-        inst_bits.get_rd(),
+        inst_bits.get_x_rd(),
         operator,
         jump_immediate_pos
     )
@@ -278,8 +287,8 @@ fn fmt_b_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, {}, pc {} {}",
         inst_filter,
-        inst_bits.get_rs1(),
-        inst_bits.get_rs2(),
+        inst_bits.get_x_rs1(),
+        inst_bits.get_x_rs2(),
         operator,
         branch_immediate_pos
     )
@@ -296,7 +305,7 @@ fn fmt_b_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits
     format!(
         "{} {}, pc {} {}",
         inst_filter,
-        inst_bits.get_rs1(),
+        inst_bits.get_x_rs1(),
         operator,
         branch_immediate_pos
     )
@@ -306,9 +315,9 @@ fn fmt_load(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Stri
     format!(
         "{} {}, {}({})",
         inst_filter,
-        inst_bits.get_rd(),
+        inst_bits.get_x_rd(),
         inst_bits.get_i_imm(),
-        inst_bits.get_rs1()
+        inst_bits.get_x_rs1()
     )
 }
 
@@ -316,9 +325,9 @@ fn fmt_store(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Str
     format!(
         "{} {}, {}({})",
         inst_filter,
-        inst_bits.get_rs2(),
+        inst_bits.get_x_rs2(),
         inst_bits.get_s_imm(),
-        inst_bits.get_rs1()
+        inst_bits.get_x_rs1()
     )
 }
 
@@ -332,22 +341,22 @@ fn fmt_csr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Strin
     format!(
         "{} {}, {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
+        inst_bits.get_x_rd(),
         csr_str,
-        inst_bits.get_rs1()
+        inst_bits.get_x_rs1()
     )
 }
 
 fn fmt_csr_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
-    format!("{} {}, {}", inst_filter, inst_bits.get_rd(), csr_str)
+    format!("{} {}, {}", inst_filter, inst_bits.get_x_rd(), csr_str)
 }
 
 fn fmt_csr_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
-    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_rs1())
+    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_x_rs1())
 }
 
 fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
@@ -356,7 +365,7 @@ fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> S
     format!(
         "{} {}, {}, {}",
         inst_filter,
-        inst_bits.get_rd(),
+        inst_bits.get_x_rd(),
         csr_str,
         inst_bits.get_uimm5()
     )
@@ -372,8 +381,8 @@ fn fmt_amo_lr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     format!(
         "{} {}, ({})",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs1()
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs1()
     )
 }
 
@@ -381,9 +390,9 @@ fn fmt_amo(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Strin
     format!(
         "{} {}, {}, ({})",
         inst_filter,
-        inst_bits.get_rd(),
-        inst_bits.get_rs2(),
-        inst_bits.get_rs1()
+        inst_bits.get_x_rd(),
+        inst_bits.get_x_rs2(),
+        inst_bits.get_x_rs1()
     )
 }
 
