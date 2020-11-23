@@ -216,4 +216,51 @@ mod test {
 
         test_disasm(disasm, test_pairs);
     }
+
+    #[test]
+    fn disasm_rv64_f() {
+        let instructions = instruction::gen_instructions(Xlen::Rv64);
+        let disasm = Disassembler::new(instructions);
+
+        let test_pairs = vec![
+            (0xe7c52007, "flw     ft0, -388(a0)"),
+            (0x00452087, "flw     ft1, 4(a0)"),
+            (0x00052007, "flw     ft0, 0(a0)"),
+            (0x0005a027, "fsw     ft0, 0(a1)"),
+            (0x0015aa27, "fsw     ft1, 20(a1)"),
+            (0x00242827, "fsw     ft2, 16(s0)"),
+            (0x001071d3, "fadd.s  ft3, ft0, ft1"),
+            (0x081071d3, "fsub.s  ft3, ft0, ft1"),
+            (0x10107053, "fmul.s  ft0, ft0, ft1"),
+            (0x181071d3, "fdiv.s  ft3, ft0, ft1"),
+            (0x580071d3, "fsqrt.s ft3, ft0"),
+            (0x281001d3, "fmin.s  ft3, ft0, ft1"),
+            (0x281011d3, "fmax.s  ft3, ft0, ft1"),
+            (0x101071c3, "fmadd.s ft3, ft0, ft1, ft2"),
+            (0x101071cf, "fnmadd.s ft3, ft0, ft1, ft2"),
+            (0x101071c7, "fmsub.s ft3, ft0, ft1, ft2"),
+            (0x101071cb, "fnmsub.s ft3, ft0, ft1, ft2"),
+            (0xd0057053, "fcvt.s.w ft0, a0"),
+            (0xd0257053, "fcvt.s.l ft0, a0"),
+            (0xd0157053, "fcvt.s.wu ft0, a0"),
+            (0xd0357053, "fcvt.s.lu ft0, a0"),
+            (0xc000f0d3, "fcvt.w.s ra, ft1"),
+            (0xc020f0d3, "fcvt.l.s ra, ft1"),
+            (0xc0101553, "fcvt.wu.s a0, ft0"),
+            (0xc0301553, "fcvt.lu.s a0, ft0"),
+            (0x201081d3, "fsgnj.s ft3, ft1, ft1"),
+            (0x20209053, "fsgnjn.s ft0, ft1, ft2"),
+            (0x2020a053, "fsgnjx.s ft0, ft1, ft2"),
+            (0xf00003d3, "fmv.w.x ft7, zero"),
+            (0xf0060153, "fmv.w.x ft2, a2"),
+            (0xf0060153, "fmv.w.x ft2, a2"),
+            (0xe0000553, "fmv.x.w a0, ft0"),
+            (0xa0102553, "feq.s   a0, ft0, ft1"),
+            (0xa0101553, "flt.s   a0, ft0, ft1"),
+            (0xa0100553, "fle.s   a0, ft0, ft1"),
+            (0xe0051553, "fclass.s a0, fa0"),
+        ];
+
+        test_disasm(disasm, test_pairs);
+    }
 }

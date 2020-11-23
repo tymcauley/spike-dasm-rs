@@ -2,7 +2,7 @@ use std::fmt;
 
 use super::csrs;
 use super::inst;
-use super::registers::{self, INT_REGISTER_ABI_NAMES};
+use super::registers::{self, FP_REGISTER_ABI_NAMES, INT_REGISTER_ABI_NAMES};
 use super::Xlen;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -65,6 +65,10 @@ impl InstructionBits {
         self.shift_and_mask(20, 5)
     }
 
+    fn get_rs3(&self) -> u32 {
+        self.shift_and_mask(27, 5)
+    }
+
     pub fn get_x_rd(&self) -> &str {
         INT_REGISTER_ABI_NAMES[self.get_rd() as usize]
     }
@@ -75,6 +79,22 @@ impl InstructionBits {
 
     pub fn get_x_rs2(&self) -> &str {
         INT_REGISTER_ABI_NAMES[self.get_rs2() as usize]
+    }
+
+    pub fn get_f_rd(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[self.get_rd() as usize]
+    }
+
+    pub fn get_f_rs1(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[self.get_rs1() as usize]
+    }
+
+    pub fn get_f_rs2(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[self.get_rs2() as usize]
+    }
+
+    pub fn get_f_rs3(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[self.get_rs3() as usize]
     }
 
     pub fn get_i_imm(&self) -> i32 {
@@ -396,12 +416,86 @@ fn fmt_amo(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Strin
     )
 }
 
+fn fmt_fp_load(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_i_imm(),
+        inst_bits.get_x_rs1()
+    )
+}
+
+fn fmt_fp_store(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_f_rs2(),
+        inst_bits.get_s_imm(),
+        inst_bits.get_x_rs1()
+    )
+}
+
+fn fmt_fp_r_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}, {}",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_f_rs1(),
+        inst_bits.get_f_rs2()
+    )
+}
+
+fn fmt_fp_r_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_f_rs1()
+    )
+}
+
+fn fmt_fp_r_type_with_rs3(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}, {}, {}",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_f_rs1(),
+        inst_bits.get_f_rs2(),
+        inst_bits.get_f_rs3()
+    )
+}
+
+fn fmt_fp_r_type_from_int(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_x_rs1()
+    )
+}
+
+fn fmt_fp_r_type_to_int(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_rd(),
+        inst_bits.get_f_rs1()
+    )
+}
+
+fn fmt_fp_r_type_int_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}, {}",
+        inst_filter,
+        inst_bits.get_x_rd(),
+        inst_bits.get_f_rs1(),
+        inst_bits.get_f_rs2()
+    )
+}
+
 /// Returns a list of `InstructionFilter` objects to use in the disassembler.
 pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
-    // TODO: Fill this out, include extensions.
-    // TODO: Pseudo-instructions.
-    // TODO: Allow disabling pseudo-instructions.
-
     vec![
         // Integer-immediate
         //  - pseudo instructions
@@ -762,6 +856,177 @@ pub fn gen_instructions(_xlen: Xlen) -> Vec<InstructionFilter> {
             inst::MASK_AMOMINU_D,
             inst::MATCH_AMOMINU_D,
             fmt_amo,
+        ),
+        // F extension, single-precision floating-point
+        InstructionFilter::new("flw", inst::MASK_FLW, inst::MATCH_FLW, fmt_fp_load),
+        InstructionFilter::new("fsw", inst::MASK_FSW, inst::MATCH_FSW, fmt_fp_store),
+        InstructionFilter::new(
+            "fadd.s",
+            inst::MASK_FADD_S,
+            inst::MATCH_FADD_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fsub.s",
+            inst::MASK_FSUB_S,
+            inst::MATCH_FSUB_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fmul.s",
+            inst::MASK_FMUL_S,
+            inst::MATCH_FMUL_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fdiv.s",
+            inst::MASK_FDIV_S,
+            inst::MATCH_FDIV_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fsqrt.s",
+            inst::MASK_FSQRT_S,
+            inst::MATCH_FSQRT_S,
+            fmt_fp_r_type_no_rs2,
+        ),
+        InstructionFilter::new(
+            "fmin.s",
+            inst::MASK_FMIN_S,
+            inst::MATCH_FMIN_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fmax.s",
+            inst::MASK_FMAX_S,
+            inst::MATCH_FMAX_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fmadd.s",
+            inst::MASK_FMADD_S,
+            inst::MATCH_FMADD_S,
+            fmt_fp_r_type_with_rs3,
+        ),
+        InstructionFilter::new(
+            "fnmadd.s",
+            inst::MASK_FNMADD_S,
+            inst::MATCH_FNMADD_S,
+            fmt_fp_r_type_with_rs3,
+        ),
+        InstructionFilter::new(
+            "fmsub.s",
+            inst::MASK_FMSUB_S,
+            inst::MATCH_FMSUB_S,
+            fmt_fp_r_type_with_rs3,
+        ),
+        InstructionFilter::new(
+            "fnmsub.s",
+            inst::MASK_FNMSUB_S,
+            inst::MATCH_FNMSUB_S,
+            fmt_fp_r_type_with_rs3,
+        ),
+        InstructionFilter::new(
+            "fcvt.s.w",
+            inst::MASK_FCVT_S_W,
+            inst::MATCH_FCVT_S_W,
+            fmt_fp_r_type_from_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.s.l",
+            inst::MASK_FCVT_S_L,
+            inst::MATCH_FCVT_S_L,
+            fmt_fp_r_type_from_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.s.wu",
+            inst::MASK_FCVT_S_WU,
+            inst::MATCH_FCVT_S_WU,
+            fmt_fp_r_type_from_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.s.lu",
+            inst::MASK_FCVT_S_LU,
+            inst::MATCH_FCVT_S_LU,
+            fmt_fp_r_type_from_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.w.s",
+            inst::MASK_FCVT_W_S,
+            inst::MATCH_FCVT_W_S,
+            fmt_fp_r_type_to_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.l.s",
+            inst::MASK_FCVT_L_S,
+            inst::MATCH_FCVT_L_S,
+            fmt_fp_r_type_to_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.wu.s",
+            inst::MASK_FCVT_WU_S,
+            inst::MATCH_FCVT_WU_S,
+            fmt_fp_r_type_to_int,
+        ),
+        InstructionFilter::new(
+            "fcvt.lu.s",
+            inst::MASK_FCVT_LU_S,
+            inst::MATCH_FCVT_LU_S,
+            fmt_fp_r_type_to_int,
+        ),
+        InstructionFilter::new(
+            "fsgnj.s",
+            inst::MASK_FSGNJ_S,
+            inst::MATCH_FSGNJ_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fsgnjn.s",
+            inst::MASK_FSGNJN_S,
+            inst::MATCH_FSGNJN_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fsgnjx.s",
+            inst::MASK_FSGNJX_S,
+            inst::MATCH_FSGNJX_S,
+            fmt_fp_r_type,
+        ),
+        InstructionFilter::new(
+            "fmv.w.x",
+            inst::MASK_FMV_W_X,
+            inst::MATCH_FMV_W_X,
+            fmt_fp_r_type_from_int,
+        ),
+        InstructionFilter::new(
+            "fmv.x.w",
+            inst::MASK_FMV_X_W,
+            inst::MATCH_FMV_X_W,
+            fmt_fp_r_type_to_int,
+        ),
+        InstructionFilter::new(
+            "feq.s",
+            inst::MASK_FEQ_S,
+            inst::MATCH_FEQ_S,
+            fmt_fp_r_type_int_rd,
+        ),
+        InstructionFilter::new(
+            "flt.s",
+            inst::MASK_FLT_S,
+            inst::MATCH_FLT_S,
+            fmt_fp_r_type_int_rd,
+        ),
+        InstructionFilter::new(
+            "fle.s",
+            inst::MASK_FLE_S,
+            inst::MATCH_FLE_S,
+            fmt_fp_r_type_int_rd,
+        ),
+        InstructionFilter::new(
+            "fclass.s",
+            inst::MASK_FCLASS_S,
+            inst::MATCH_FCLASS_S,
+            fmt_fp_r_type_to_int,
         ),
     ]
 }
