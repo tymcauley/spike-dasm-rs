@@ -514,6 +514,15 @@ fn fmt_no_args(inst_filter: &InstructionFilter, _inst_bits: InstructionBits) -> 
     format!("{}", inst_filter)
 }
 
+fn fmt_rs1_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_rs1(),
+        inst_bits.get_x_rs2()
+    )
+}
+
 fn fmt_csr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
@@ -1141,6 +1150,12 @@ pub fn gen_instructions(
             InstructionFilter::new("mret", inst::MASK_MRET, inst::MATCH_MRET, fmt_no_args),
             InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
             InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
+            InstructionFilter::new(
+                "sfence.vma",
+                inst::MASK_SFENCE_VMA,
+                inst::MATCH_SFENCE_VMA,
+                fmt_rs1_rs2,
+            ),
             // Control and status registers, Zicsr extension
             InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
             InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),

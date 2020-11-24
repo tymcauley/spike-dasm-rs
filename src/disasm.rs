@@ -106,6 +106,8 @@ mod test {
             (0x00000073, "ecall  "),
             (0x10500073, "wfi    "),
             (0x30200073, "mret   "),
+            (0x12000073, "sfence.vma zero, zero"),
+            (0x12050073, "sfence.vma a0, zero"),
         ];
 
         test_disasm(disasm, test_pairs);
