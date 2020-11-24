@@ -303,7 +303,7 @@ impl InstructionBits {
     pub fn get_c_shamt(&self) -> u32 {
         // The shift-amount is the same as the CI immediate, but zero-extended rather than
         // sign-extended.
-        (self.get_ci_imm() as u32) & 0x1f
+        (self.get_ci_imm() as u32) & 0x3f
     }
 }
 
