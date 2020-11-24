@@ -53,48 +53,118 @@ impl InstructionBits {
         (signed_bits << (32 - sign_extend_shift) >> (32 - mask_width)) as u32
     }
 
+    /// Returns the index of register `rd`
     fn get_idx_rd(&self) -> u32 {
         self.shift_and_mask(7, 5)
     }
 
+    /// Returns the index of register `rs1`
     fn get_idx_rs1(&self) -> u32 {
         self.shift_and_mask(15, 5)
     }
 
+    /// Returns the index of register `rs2`
     fn get_idx_rs2(&self) -> u32 {
         self.shift_and_mask(20, 5)
     }
 
+    /// Returns the index of register `rs3`
     fn get_idx_rs3(&self) -> u32 {
         self.shift_and_mask(27, 5)
     }
 
+    /// Returns the index of register `rs1` in compressed instructions
+    fn get_idx_c_rs1(&self) -> u32 {
+        self.shift_and_mask(7, 5)
+    }
+
+    /// Returns the index of register `rs2` in compressed instructions
+    fn get_idx_c_rs2(&self) -> u32 {
+        self.shift_and_mask(2, 5)
+    }
+
+    /// Returns the index of register `rd'` (3-bit register encoding) in compressed instructions
+    ///
+    /// Note that this is the same index as register `rs2'`.
+    fn get_idx_c3_rd(&self) -> u32 {
+        self.shift_and_mask(2, 3)
+    }
+
+    /// Returns the index of register `rs1'` (3-bit register encoding) in compressed instructions
+    fn get_idx_c3_rs1(&self) -> u32 {
+        self.shift_and_mask(7, 3)
+    }
+
+    /// Returns the ABI name of integer register `rd`
     pub fn get_x_rd(&self) -> &str {
         INT_REGISTER_ABI_NAMES[self.get_idx_rd() as usize]
     }
 
+    /// Returns the ABI name of integer register `rs1`
     pub fn get_x_rs1(&self) -> &str {
         INT_REGISTER_ABI_NAMES[self.get_idx_rs1() as usize]
     }
 
+    /// Returns the ABI name of integer register `rs2`
     pub fn get_x_rs2(&self) -> &str {
         INT_REGISTER_ABI_NAMES[self.get_idx_rs2() as usize]
     }
 
+    /// Returns the ABI name of floating-point register `rd`
     pub fn get_f_rd(&self) -> &str {
         FP_REGISTER_ABI_NAMES[self.get_idx_rd() as usize]
     }
 
+    /// Returns the ABI name of floating-point register `rs1`
     pub fn get_f_rs1(&self) -> &str {
         FP_REGISTER_ABI_NAMES[self.get_idx_rs1() as usize]
     }
 
+    /// Returns the ABI name of floating-point register `rs2`
     pub fn get_f_rs2(&self) -> &str {
         FP_REGISTER_ABI_NAMES[self.get_idx_rs2() as usize]
     }
 
+    /// Returns the ABI name of floating-point register `rs3`
     pub fn get_f_rs3(&self) -> &str {
         FP_REGISTER_ABI_NAMES[self.get_idx_rs3() as usize]
+    }
+
+    /// Returns the ABI name of integer register `rs1` in compressed instructions
+    pub fn get_x_c_rs1(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[self.get_idx_c_rs1() as usize]
+    }
+
+    /// Returns the ABI name of integer register `rs2` in compressed instructions
+    pub fn get_x_c_rs2(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[self.get_idx_c_rs2() as usize]
+    }
+
+    /// Returns the ABI name of integer register `rd'` (3-bit register encoding) in compressed
+    /// instructions
+    ///
+    /// Note that this is the same ABI name as integer register `rs2'`.
+    pub fn get_x_c3_rd(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[(self.get_idx_c3_rd() + 8) as usize]
+    }
+
+    /// Returns the ABI name of integer register `rs1'` (3-bit register encoding) in compressed
+    /// instructions
+    pub fn get_x_c3_rs1(&self) -> &str {
+        INT_REGISTER_ABI_NAMES[(self.get_idx_c3_rs1() + 8) as usize]
+    }
+
+    /// Returns the ABI name of floating-point register `rd'` (3-bit register encoding) in
+    /// compressed instructions
+    ///
+    /// Note that this is the same ABI name as floating-point register `rs2'`.
+    pub fn get_f_c3_rd(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[(self.get_idx_c3_rd() + 8) as usize]
+    }
+
+    /// Returns the ABI name of floating-point register `rs2` in compressed instructions
+    pub fn get_f_c_rs2(&self) -> &str {
+        FP_REGISTER_ABI_NAMES[self.get_idx_c_rs2() as usize]
     }
 
     pub fn get_i_imm(&self) -> i32 {
@@ -145,6 +215,95 @@ impl InstructionBits {
 
     pub fn get_csr(&self) -> u32 {
         self.shift_and_mask(20, 12)
+    }
+
+    pub fn get_ci_lwsp_imm(&self) -> u32 {
+        let imm_4_2 = self.shift_and_mask(4, 3) << 2;
+        let imm_5 = self.shift_and_mask(12, 1) << 5;
+        let imm_7_6 = self.shift_and_mask(2, 2) << 6;
+        imm_4_2 + imm_5 + imm_7_6
+    }
+
+    pub fn get_ci_ldsp_imm(&self) -> u32 {
+        let imm_4_3 = self.shift_and_mask(5, 2) << 3;
+        let imm_5 = self.shift_and_mask(12, 1) << 5;
+        let imm_8_6 = self.shift_and_mask(2, 3) << 6;
+        imm_4_3 + imm_5 + imm_8_6
+    }
+
+    pub fn get_css_swsp_imm(&self) -> u32 {
+        let imm_5_2 = self.shift_and_mask(9, 4) << 2;
+        let imm_7_6 = self.shift_and_mask(7, 2) << 6;
+        imm_5_2 + imm_7_6
+    }
+
+    pub fn get_css_sdsp_imm(&self) -> u32 {
+        let imm_5_3 = self.shift_and_mask(10, 3) << 3;
+        let imm_8_6 = self.shift_and_mask(7, 3) << 6;
+        imm_5_3 + imm_8_6
+    }
+
+    pub fn get_cl_lw_imm(&self) -> u32 {
+        let imm_2 = self.shift_and_mask(6, 1) << 2;
+        let imm_5_3 = self.shift_and_mask(10, 3) << 3;
+        let imm_6 = self.shift_and_mask(5, 1) << 6;
+        imm_2 + imm_5_3 + imm_6
+    }
+
+    pub fn get_cl_ld_imm(&self) -> u32 {
+        let imm_5_3 = self.shift_and_mask(10, 3) << 3;
+        let imm_7_6 = self.shift_and_mask(5, 2) << 6;
+        imm_5_3 + imm_7_6
+    }
+
+    pub fn get_cj_imm(&self) -> i32 {
+        let imm_3_1 = self.shift_and_mask(3, 3) << 1;
+        let imm_4 = self.shift_and_mask(11, 1) << 4;
+        let imm_5 = self.shift_and_mask(2, 1) << 5;
+        let imm_6 = self.shift_and_mask(7, 1) << 6;
+        let imm_7 = self.shift_and_mask(6, 1) << 7;
+        let imm_9_8 = self.shift_and_mask(9, 2) << 8;
+        let imm_10 = self.shift_and_mask(8, 1) << 10;
+        let imm_11 = self.shift_and_mask_signed(12, 1) << 11;
+        (imm_3_1 + imm_4 + imm_5 + imm_6 + imm_7 + imm_9_8 + imm_10 + imm_11) as i32
+    }
+
+    pub fn get_cb_imm(&self) -> i32 {
+        let imm_2_1 = self.shift_and_mask(3, 2) << 1;
+        let imm_4_3 = self.shift_and_mask(10, 2) << 3;
+        let imm_5 = self.shift_and_mask(2, 1) << 5;
+        let imm_7_6 = self.shift_and_mask(5, 2) << 6;
+        let imm_8 = self.shift_and_mask_signed(12, 1) << 8;
+        (imm_2_1 + imm_4_3 + imm_5 + imm_7_6 + imm_8) as i32
+    }
+
+    pub fn get_ci_imm(&self) -> i32 {
+        let imm_4_0 = self.shift_and_mask(2, 5);
+        let imm_5 = self.shift_and_mask_signed(12, 1) << 5;
+        (imm_4_0 + imm_5) as i32
+    }
+
+    pub fn get_ci_addi16sp_imm(&self) -> i32 {
+        let imm_4 = self.shift_and_mask(6, 1) << 4;
+        let imm_5 = self.shift_and_mask(2, 1) << 5;
+        let imm_6 = self.shift_and_mask(5, 1) << 6;
+        let imm_8_7 = self.shift_and_mask(3, 2) << 7;
+        let imm_9 = self.shift_and_mask_signed(12, 1) << 9;
+        (imm_4 + imm_5 + imm_6 + imm_8_7 + imm_9) as i32
+    }
+
+    pub fn get_ciw_addi4spn_imm(&self) -> u32 {
+        let imm_2 = self.shift_and_mask(6, 1) << 2;
+        let imm_3 = self.shift_and_mask(5, 1) << 3;
+        let imm_5_4 = self.shift_and_mask(11, 2) << 4;
+        let imm_9_6 = self.shift_and_mask(7, 4) << 6;
+        imm_2 + imm_3 + imm_5_4 + imm_9_6
+    }
+
+    pub fn get_c_shamt(&self) -> u32 {
+        // The shift-amount is the same as the CI immediate, but zero-extended rather than
+        // sign-extended.
+        (self.get_ci_imm() as u32) & 0x1f
     }
 }
 
@@ -494,9 +653,234 @@ fn fmt_fp_r_type_int_rd(inst_filter: &InstructionFilter, inst_bits: InstructionB
     )
 }
 
+fn fmt_ci_type_lwsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_x_rd(),
+        inst_bits.get_ci_lwsp_imm()
+    )
+}
+
+fn fmt_ci_type_flwsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_ci_lwsp_imm()
+    )
+}
+
+fn fmt_ci_type_ldsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_x_rd(),
+        inst_bits.get_ci_ldsp_imm()
+    )
+}
+
+fn fmt_ci_type_fldsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_f_rd(),
+        inst_bits.get_ci_ldsp_imm()
+    )
+}
+
+fn fmt_css_type_swsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_x_c_rs2(),
+        inst_bits.get_css_swsp_imm()
+    )
+}
+
+fn fmt_css_type_fswsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_f_c_rs2(),
+        inst_bits.get_css_swsp_imm()
+    )
+}
+
+fn fmt_css_type_sdsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_x_c_rs2(),
+        inst_bits.get_css_sdsp_imm()
+    )
+}
+
+fn fmt_css_type_fsdsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}(sp)",
+        inst_filter,
+        inst_bits.get_f_c_rs2(),
+        inst_bits.get_css_sdsp_imm()
+    )
+}
+
+fn fmt_cl_type_lw(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_x_c3_rd(),
+        inst_bits.get_cl_lw_imm(),
+        inst_bits.get_x_c3_rs1()
+    )
+}
+
+fn fmt_cl_type_ld(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_x_c3_rd(),
+        inst_bits.get_cl_ld_imm(),
+        inst_bits.get_x_c3_rs1()
+    )
+}
+
+fn fmt_cl_type_flw(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_f_c3_rd(),
+        inst_bits.get_cl_lw_imm(),
+        inst_bits.get_x_c3_rs1()
+    )
+}
+
+fn fmt_cl_type_fld(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}({})",
+        inst_filter,
+        inst_bits.get_f_c3_rd(),
+        inst_bits.get_cl_ld_imm(),
+        inst_bits.get_x_c3_rs1()
+    )
+}
+
+fn fmt_cj_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let jump_immediate = inst_bits.get_cj_imm();
+    let operator = if jump_immediate.is_negative() {
+        '-'
+    } else {
+        '+'
+    };
+    let jump_immediate_pos = jump_immediate.abs();
+    format!("{} pc {} {}", inst_filter, operator, jump_immediate_pos)
+}
+
+fn fmt_cr_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c_rs1(),
+        inst_bits.get_x_c_rs2()
+    )
+}
+
+fn fmt_cr_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!("{} {}", inst_filter, inst_bits.get_x_c_rs1())
+}
+
+fn fmt_cb_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    let branch_immediate = inst_bits.get_cb_imm();
+    let operator = if branch_immediate.is_negative() {
+        '-'
+    } else {
+        '+'
+    };
+    let branch_immediate_pos = branch_immediate.abs();
+    format!(
+        "{} {}, pc {} {}",
+        inst_filter,
+        inst_bits.get_x_c3_rs1(),
+        operator,
+        branch_immediate_pos
+    )
+}
+
+fn fmt_cb_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c3_rs1(),
+        inst_bits.get_c_shamt()
+    )
+}
+
+fn fmt_cb_type_andi(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c3_rs1(),
+        inst_bits.get_ci_imm()
+    )
+}
+
+fn fmt_ci_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
+        inst_bits.get_ci_imm()
+    )
+}
+
+fn fmt_ci_type_lui(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    // Mask off the 12 most-significant bits. The `c.lui` instruction takes the 6-bit immediate
+    // field `ci_imm`, sign-extends it, and left-shifts it by 12. The disassembly doesn't need to
+    // bother showing those 12 trailing zeros, so we just show the 20-bit sign-extended immediate
+    // which will be placed in bits 31:12 of `rd`.
+    let ci_uimm = (inst_bits.get_ci_imm() as u32) << 12 >> 12;
+    format!(
+        "{} {}, {:#x}",
+        inst_filter,
+        inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
+        ci_uimm
+    )
+}
+
+fn fmt_ci_type_addi16sp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!("{} sp, {}", inst_filter, inst_bits.get_ci_addi16sp_imm())
+}
+
+fn fmt_ciw_type_addi4spn(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, sp, {}",
+        inst_filter,
+        inst_bits.get_x_c3_rd(),
+        inst_bits.get_ciw_addi4spn_imm()
+    )
+}
+
+fn fmt_ci_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
+        inst_bits.get_c_shamt()
+    )
+}
+
+fn fmt_ca_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
+    format!(
+        "{} {}, {}",
+        inst_filter,
+        inst_bits.get_x_c3_rs1(),
+        inst_bits.get_x_c3_rd()
+    )
+}
+
 /// Returns a list of `InstructionFilter` objects to use in the disassembler.
 pub fn gen_instructions(
-    _xlen: Xlen,
+    xlen: Xlen,
     isa_extensions: Extensions,
     enable_pseudo_instructions: bool,
 ) -> Vec<InstructionFilter> {
@@ -1253,11 +1637,241 @@ pub fn gen_instructions(
         vec![]
     };
 
+    // C extension, compressed instructions
+    let c_inst_filters = if isa_extensions.has_c() {
+        let mut pseudo_instruction_filters = if enable_pseudo_instructions {
+            vec![InstructionFilter::new(
+                "ret",
+                inst::MASK_C_JR | registers::MASK_RD,
+                inst::MATCH_C_JR | registers::MATCH_RD_EQUALS_RA,
+                fmt_no_args,
+            )]
+        } else {
+            vec![]
+        };
+
+        let xlen_filters = match xlen {
+            Xlen::Rv32 => {
+                let mut rv32_filters = vec![InstructionFilter::new(
+                    "c.jal",
+                    inst::MASK_C_JAL,
+                    inst::MATCH_C_JAL,
+                    fmt_cj_type,
+                )];
+                let rv32f_filters = if isa_extensions.has_f() {
+                    vec![
+                        InstructionFilter::new(
+                            "c.flwsp",
+                            inst::MASK_C_FLWSP,
+                            inst::MATCH_C_FLWSP,
+                            fmt_ci_type_flwsp,
+                        ),
+                        InstructionFilter::new(
+                            "c.fswsp",
+                            inst::MASK_C_FSWSP,
+                            inst::MATCH_C_FSWSP,
+                            fmt_css_type_fswsp,
+                        ),
+                        InstructionFilter::new(
+                            "c.flw",
+                            inst::MASK_C_FLW,
+                            inst::MATCH_C_FLW,
+                            fmt_cl_type_flw,
+                        ),
+                        InstructionFilter::new(
+                            "c.fsw",
+                            inst::MASK_C_FSW,
+                            inst::MATCH_C_FSW,
+                            fmt_cl_type_flw,
+                        ),
+                    ]
+                } else {
+                    vec![]
+                };
+                rv32_filters.extend(rv32f_filters);
+                rv32_filters
+            }
+
+            Xlen::Rv64 => vec![
+                InstructionFilter::new(
+                    "c.ldsp",
+                    inst::MASK_C_LDSP,
+                    inst::MATCH_C_LDSP,
+                    fmt_ci_type_ldsp,
+                ),
+                InstructionFilter::new(
+                    "c.sdsp",
+                    inst::MASK_C_SDSP,
+                    inst::MATCH_C_SDSP,
+                    fmt_css_type_sdsp,
+                ),
+                InstructionFilter::new("c.ld", inst::MASK_C_LD, inst::MATCH_C_LD, fmt_cl_type_ld),
+                InstructionFilter::new("c.sd", inst::MASK_C_SD, inst::MATCH_C_SD, fmt_cl_type_ld),
+                InstructionFilter::new(
+                    "c.addiw",
+                    inst::MASK_C_ADDIW,
+                    inst::MATCH_C_ADDIW,
+                    fmt_ci_type,
+                ),
+                InstructionFilter::new(
+                    "c.addw",
+                    inst::MASK_C_ADDW,
+                    inst::MATCH_C_ADDW,
+                    fmt_ca_type,
+                ),
+                InstructionFilter::new(
+                    "c.subw",
+                    inst::MASK_C_SUBW,
+                    inst::MATCH_C_SUBW,
+                    fmt_ca_type,
+                ),
+            ],
+        };
+
+        let d_filters = if isa_extensions.has_d() {
+            vec![
+                InstructionFilter::new(
+                    "c.fldsp",
+                    inst::MASK_C_FLDSP,
+                    inst::MATCH_C_FLDSP,
+                    fmt_ci_type_fldsp,
+                ),
+                InstructionFilter::new(
+                    "c.fsdsp",
+                    inst::MASK_C_FSDSP,
+                    inst::MATCH_C_FSDSP,
+                    fmt_css_type_fsdsp,
+                ),
+                InstructionFilter::new(
+                    "c.fld",
+                    inst::MASK_C_FLD,
+                    inst::MATCH_C_FLD,
+                    fmt_cl_type_fld,
+                ),
+                InstructionFilter::new(
+                    "c.fsd",
+                    inst::MASK_C_FSD,
+                    inst::MATCH_C_FSD,
+                    fmt_cl_type_fld,
+                ),
+            ]
+        } else {
+            vec![]
+        };
+
+        let global_filters = vec![
+            InstructionFilter::new(
+                "c.lwsp",
+                inst::MASK_C_LWSP,
+                inst::MATCH_C_LWSP,
+                fmt_ci_type_lwsp,
+            ),
+            InstructionFilter::new(
+                "c.swsp",
+                inst::MASK_C_SWSP,
+                inst::MATCH_C_SWSP,
+                fmt_css_type_swsp,
+            ),
+            InstructionFilter::new("c.lw", inst::MASK_C_LW, inst::MATCH_C_LW, fmt_cl_type_lw),
+            InstructionFilter::new("c.sw", inst::MASK_C_SW, inst::MATCH_C_SW, fmt_cl_type_lw),
+            InstructionFilter::new(
+                "c.ebreak",
+                inst::MASK_C_EBREAK,
+                inst::MATCH_C_EBREAK,
+                fmt_no_args,
+            ),
+            InstructionFilter::new("c.j", inst::MASK_C_J, inst::MATCH_C_J, fmt_cj_type),
+            InstructionFilter::new(
+                "c.jr",
+                inst::MASK_C_JR,
+                inst::MATCH_C_JR,
+                fmt_cr_type_no_rs2,
+            ),
+            // `c.jalr` must come after `c.ebreak`, otherwise the `c.jalr` filter will match any
+            // `c.ebreak` instructions.
+            InstructionFilter::new(
+                "c.jalr",
+                inst::MASK_C_JALR,
+                inst::MATCH_C_JALR,
+                fmt_cr_type_no_rs2,
+            ),
+            InstructionFilter::new("c.beqz", inst::MASK_C_BEQZ, inst::MATCH_C_BEQZ, fmt_cb_type),
+            InstructionFilter::new("c.bnez", inst::MASK_C_BNEZ, inst::MATCH_C_BNEZ, fmt_cb_type),
+            InstructionFilter::new("c.li", inst::MASK_C_LI, inst::MATCH_C_LI, fmt_ci_type),
+            InstructionFilter::new("c.nop", inst::MASK_C_NOP, inst::MATCH_C_NOP, fmt_no_args),
+            // `c.addi` must come after `c.nop`, otherwise the `c.addi` filter will match any
+            // `c.nop` instructions.
+            InstructionFilter::new("c.addi", inst::MASK_C_ADDI, inst::MATCH_C_ADDI, fmt_ci_type),
+            InstructionFilter::new(
+                "c.addi16sp",
+                inst::MASK_C_ADDI16SP,
+                inst::MATCH_C_ADDI16SP,
+                fmt_ci_type_addi16sp,
+            ),
+            InstructionFilter::new(
+                "c.addi4spn",
+                inst::MASK_C_ADDI4SPN,
+                inst::MATCH_C_ADDI4SPN,
+                fmt_ciw_type_addi4spn,
+            ),
+            InstructionFilter::new(
+                "c.slli",
+                inst::MASK_C_SLLI,
+                inst::MATCH_C_SLLI,
+                fmt_ci_type_shift,
+            ),
+            InstructionFilter::new(
+                "c.srli",
+                inst::MASK_C_SRLI,
+                inst::MATCH_C_SRLI,
+                fmt_cb_type_shift,
+            ),
+            InstructionFilter::new(
+                "c.srai",
+                inst::MASK_C_SRAI,
+                inst::MATCH_C_SRAI,
+                fmt_cb_type_shift,
+            ),
+            InstructionFilter::new(
+                "c.andi",
+                inst::MASK_C_ANDI,
+                inst::MATCH_C_ANDI,
+                fmt_cb_type_andi,
+            ),
+            // `c.mv` must come after `c.jr`, otherwise the `c.mv` filter will match any `c.jr`
+            // instructions.
+            InstructionFilter::new("c.mv", inst::MASK_C_MV, inst::MATCH_C_MV, fmt_cr_type),
+            // `c.add` must come after `c.jalr` and `c.ebreak`, otherwise the `c.add` filter will
+            // match any `c.jalr`/`c.ebreak` instructions.
+            InstructionFilter::new("c.add", inst::MASK_C_ADD, inst::MATCH_C_ADD, fmt_cr_type),
+            InstructionFilter::new("c.and", inst::MASK_C_AND, inst::MATCH_C_AND, fmt_ca_type),
+            InstructionFilter::new("c.or", inst::MASK_C_OR, inst::MATCH_C_OR, fmt_ca_type),
+            InstructionFilter::new("c.xor", inst::MASK_C_XOR, inst::MATCH_C_XOR, fmt_ca_type),
+            InstructionFilter::new("c.sub", inst::MASK_C_SUB, inst::MATCH_C_SUB, fmt_ca_type),
+            // `c.lui` must come after `c.addi16sp`, otherwise the `c.lui` filter will match any
+            // `c.addi16sp` instructions.
+            InstructionFilter::new(
+                "c.lui",
+                inst::MASK_C_LUI,
+                inst::MATCH_C_LUI,
+                fmt_ci_type_lui,
+            ),
+        ];
+
+        pseudo_instruction_filters.extend(xlen_filters);
+        pseudo_instruction_filters.extend(d_filters);
+        pseudo_instruction_filters.extend(global_filters);
+        pseudo_instruction_filters
+    } else {
+        vec![]
+    };
+
     i_pseudo_instruction_inst_filters.extend(i_inst_filters);
     i_pseudo_instruction_inst_filters.extend(m_inst_filters);
     i_pseudo_instruction_inst_filters.extend(a_inst_filters);
     i_pseudo_instruction_inst_filters.extend(f_inst_filters);
     i_pseudo_instruction_inst_filters.extend(d_inst_filters);
+    i_pseudo_instruction_inst_filters.extend(c_inst_filters);
     i_pseudo_instruction_inst_filters
 }
 
