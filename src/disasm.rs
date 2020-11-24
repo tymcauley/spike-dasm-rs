@@ -101,11 +101,11 @@ mod test {
             (0x00111523, "sh      ra, 10(sp)"),
             (0x00d62023, "sw      a3, 0(a2)"),
             (0xfe20b423, "sd      sp, -24(ra)"),
-            (0x0ff0000f, "fence  "),
+            (0x0ff0000f, "fence"),
             (0x0000100f, "fence.i"),
-            (0x00000073, "ecall  "),
-            (0x10500073, "wfi    "),
-            (0x30200073, "mret   "),
+            (0x00000073, "ecall"),
+            (0x10500073, "wfi"),
+            (0x30200073, "mret"),
             (0x12000073, "sfence.vma zero, zero"),
             (0x12050073, "sfence.vma a0, zero"),
         ];
@@ -136,7 +136,7 @@ mod test {
         let disasm = Disassembler::new(instructions);
 
         let test_pairs = vec![
-            (0x00000013, "nop    "),
+            (0x00000013, "nop"),
             (0x00300193, "li      gp, 3"),
             (0x00010513, "mv      a0, sp"),
             (0xfff74813, "not     a6, a4"),
@@ -148,7 +148,7 @@ mod test {
             (0x7ea0106f, "j       pc + 0x17ea"),
             (0x269020ef, "jal     pc + 0x2a68"),
             (0xe48ff0ef, "jal     pc - 0x9b8"),
-            (0x00008067, "ret    "),
+            (0x00008067, "ret"),
             (0x000f0067, "jr      t5"),
             (0x000300e7, "jalr    t1"),
             (0x00050463, "beqz    a0, pc + 8"),
@@ -433,9 +433,9 @@ mod test {
             (0x00009ca9, "c.addw  s1, a0"),
             (0x00009f99, "c.subw  a5, a4"),
             (0x00009d01, "c.subw  a0, s0"),
-            (0x00000001, "c.nop  "),
+            (0x00000001, "c.nop"),
             (0x00009002, "c.ebreak"),
-            (0x00008082, "ret    "),
+            (0x00008082, "ret"),
         ];
 
         test_disasm(disasm, test_pairs);

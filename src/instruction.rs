@@ -319,8 +319,10 @@ impl fmt::Debug for InstructionBits {
 // type FmtFn = Box<dyn Fn(&InstructionFilter, InstructionBits) -> String>;
 type FmtFn = fn(&InstructionFilter, InstructionBits) -> String;
 
+const INSTRUCTION_NAME_WIDTH: usize = 7;
+
 pub struct InstructionFilter {
-    name: &'static str,
+    pub name: &'static str,
     mask: u32,
     r#match: u32,
     pub formatter: FmtFn,
@@ -343,7 +345,7 @@ impl InstructionFilter {
 
 impl fmt::Display for InstructionFilter {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:<7}", self.name)
+        write!(f, "{}", self.name)
     }
 }
 
@@ -359,71 +361,83 @@ impl fmt::Debug for InstructionFilter {
 
 fn fmt_i_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_x_rs1(),
-        inst_bits.get_i_imm()
+        inst_bits.get_i_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_i_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_x_rs1(),
-        inst_bits.get_shamt()
+        inst_bits.get_shamt(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_i_type_just_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
-    format!("{} {}", inst_filter, inst_bits.get_x_rs1())
+    format!(
+        "{:<width$} {}",
+        inst_filter.name,
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_i_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_i_imm()
+        inst_bits.get_i_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_i_type_no_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_u_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {:#x}",
-        inst_filter,
+        "{:<width$} {}, {:#x}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_big_imm()
+        inst_bits.get_big_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_r_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_x_rs1(),
-        inst_bits.get_x_rs2()
+        inst_bits.get_x_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_r_type_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_x_rs2()
+        inst_bits.get_x_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -436,11 +450,12 @@ fn fmt_j_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     };
     let jump_immediate_pos = jump_immediate.abs();
     format!(
-        "{} {}, pc {} {:#x}",
-        inst_filter,
+        "{:<width$} {}, pc {} {:#x}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         operator,
-        jump_immediate_pos
+        jump_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -452,7 +467,13 @@ fn fmt_j_type_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits)
         '+'
     };
     let jump_immediate_pos = jump_immediate.abs();
-    format!("{} pc {} {:#x}", inst_filter, operator, jump_immediate_pos)
+    format!(
+        "{:<width$} pc {} {:#x}",
+        inst_filter.name,
+        operator,
+        jump_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_b_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
@@ -464,12 +485,13 @@ fn fmt_b_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> St
     };
     let branch_immediate_pos = branch_immediate.abs();
     format!(
-        "{} {}, {}, pc {} {}",
-        inst_filter,
+        "{:<width$} {}, {}, pc {} {}",
+        inst_filter.name,
         inst_bits.get_x_rs1(),
         inst_bits.get_x_rs2(),
         operator,
-        branch_immediate_pos
+        branch_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -482,44 +504,48 @@ fn fmt_b_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits
     };
     let branch_immediate_pos = branch_immediate.abs();
     format!(
-        "{} {}, pc {} {}",
-        inst_filter,
+        "{:<width$} {}, pc {} {}",
+        inst_filter.name,
         inst_bits.get_x_rs1(),
         operator,
-        branch_immediate_pos
+        branch_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_load(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_i_imm(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_store(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_x_rs2(),
         inst_bits.get_s_imm(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_no_args(inst_filter: &InstructionFilter, _inst_bits: InstructionBits) -> String {
-    format!("{}", inst_filter)
+    format!("{}", inst_filter.name)
 }
 
 fn fmt_rs1_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rs1(),
-        inst_bits.get_x_rs2()
+        inst_bits.get_x_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -527,250 +553,292 @@ fn fmt_csr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Strin
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         csr_str,
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_csr_no_rs1(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
-    format!("{} {}, {}", inst_filter, inst_bits.get_x_rd(), csr_str)
+    format!(
+        "{:<width$} {}, {}",
+        inst_filter.name,
+        inst_bits.get_x_rd(),
+        csr_str,
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_csr_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
-    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_x_rs1())
+    format!(
+        "{:<width$} {}, {}",
+        inst_filter.name,
+        csr_str,
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_csr_imm(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         csr_str,
-        inst_bits.get_uimm5()
+        inst_bits.get_uimm5(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_csr_imm_no_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     let csr_index = inst_bits.get_csr();
     let csr_str = csrs::lookup_csr(csr_index).unwrap_or("unknown");
-    format!("{} {}, {}", inst_filter, csr_str, inst_bits.get_uimm5())
+    format!(
+        "{:<width$} {}, {}",
+        inst_filter.name,
+        csr_str,
+        inst_bits.get_uimm5(),
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_amo_lr(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, ({})",
-        inst_filter,
+        "{:<width$} {}, ({})",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_amo(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, ({})",
-        inst_filter,
+        "{:<width$} {}, {}, ({})",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_x_rs2(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_load(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_f_rd(),
         inst_bits.get_i_imm(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_store(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_f_rs2(),
         inst_bits.get_s_imm(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_f_rd(),
         inst_bits.get_f_rs1(),
-        inst_bits.get_f_rs2()
+        inst_bits.get_f_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_f_rd(),
-        inst_bits.get_f_rs1()
+        inst_bits.get_f_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type_with_rs3(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_f_rd(),
         inst_bits.get_f_rs1(),
         inst_bits.get_f_rs2(),
-        inst_bits.get_f_rs3()
+        inst_bits.get_f_rs3(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type_from_int(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_f_rd(),
-        inst_bits.get_x_rs1()
+        inst_bits.get_x_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type_to_int(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_f_rs1()
+        inst_bits.get_f_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_fp_r_type_int_rd(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}, {}",
+        inst_filter.name,
         inst_bits.get_x_rd(),
         inst_bits.get_f_rs1(),
-        inst_bits.get_f_rs2()
+        inst_bits.get_f_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_lwsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_ci_lwsp_imm()
+        inst_bits.get_ci_lwsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_flwsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_f_rd(),
-        inst_bits.get_ci_lwsp_imm()
+        inst_bits.get_ci_lwsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_ldsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_x_rd(),
-        inst_bits.get_ci_ldsp_imm()
+        inst_bits.get_ci_ldsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_fldsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_f_rd(),
-        inst_bits.get_ci_ldsp_imm()
+        inst_bits.get_ci_ldsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_css_type_swsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_x_c_rs2(),
-        inst_bits.get_css_swsp_imm()
+        inst_bits.get_css_swsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_css_type_fswsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_f_c_rs2(),
-        inst_bits.get_css_swsp_imm()
+        inst_bits.get_css_swsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_css_type_sdsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_x_c_rs2(),
-        inst_bits.get_css_sdsp_imm()
+        inst_bits.get_css_sdsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_css_type_fsdsp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}(sp)",
-        inst_filter,
+        "{:<width$} {}, {}(sp)",
+        inst_filter.name,
         inst_bits.get_f_c_rs2(),
-        inst_bits.get_css_sdsp_imm()
+        inst_bits.get_css_sdsp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cl_type_lw(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_x_c3_rd(),
         inst_bits.get_cl_lw_imm(),
-        inst_bits.get_x_c3_rs1()
+        inst_bits.get_x_c3_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cl_type_ld(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_x_c3_rd(),
         inst_bits.get_cl_ld_imm(),
-        inst_bits.get_x_c3_rs1()
+        inst_bits.get_x_c3_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cl_type_flw(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_f_c3_rd(),
         inst_bits.get_cl_lw_imm(),
-        inst_bits.get_x_c3_rs1()
+        inst_bits.get_x_c3_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cl_type_fld(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}({})",
-        inst_filter,
+        "{:<width$} {}, {}({})",
+        inst_filter.name,
         inst_bits.get_f_c3_rd(),
         inst_bits.get_cl_ld_imm(),
-        inst_bits.get_x_c3_rs1()
+        inst_bits.get_x_c3_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -782,20 +850,32 @@ fn fmt_cj_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> S
         '+'
     };
     let jump_immediate_pos = jump_immediate.abs();
-    format!("{} pc {} {}", inst_filter, operator, jump_immediate_pos)
+    format!(
+        "{:<width$} pc {} {}",
+        inst_filter.name,
+        operator,
+        jump_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_cr_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c_rs1(),
-        inst_bits.get_x_c_rs2()
+        inst_bits.get_x_c_rs2(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cr_type_no_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
-    format!("{} {}", inst_filter, inst_bits.get_x_c_rs1())
+    format!(
+        "{:<width$} {}",
+        inst_filter.name,
+        inst_bits.get_x_c_rs1(),
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_cb_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
@@ -807,38 +887,42 @@ fn fmt_cb_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> S
     };
     let branch_immediate_pos = branch_immediate.abs();
     format!(
-        "{} {}, pc {} {}",
-        inst_filter,
+        "{:<width$} {}, pc {} {}",
+        inst_filter.name,
         inst_bits.get_x_c3_rs1(),
         operator,
-        branch_immediate_pos
+        branch_immediate_pos,
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cb_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c3_rs1(),
-        inst_bits.get_c_shamt()
+        inst_bits.get_c_shamt(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_cb_type_andi(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c3_rs1(),
-        inst_bits.get_ci_imm()
+        inst_bits.get_ci_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
-        inst_bits.get_ci_imm()
+        inst_bits.get_ci_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
@@ -849,41 +933,50 @@ fn fmt_ci_type_lui(inst_filter: &InstructionFilter, inst_bits: InstructionBits) 
     // which will be placed in bits 31:12 of `rd`.
     let ci_uimm = (inst_bits.get_ci_imm() as u32) << 12 >> 12;
     format!(
-        "{} {}, {:#x}",
-        inst_filter,
+        "{:<width$} {}, {:#x}",
+        inst_filter.name,
         inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
-        ci_uimm
+        ci_uimm,
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_addi16sp(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
-    format!("{} sp, {}", inst_filter, inst_bits.get_ci_addi16sp_imm())
+    format!(
+        "{:<width$} sp, {}",
+        inst_filter.name,
+        inst_bits.get_ci_addi16sp_imm(),
+        width = INSTRUCTION_NAME_WIDTH
+    )
 }
 
 fn fmt_ciw_type_addi4spn(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, sp, {}",
-        inst_filter,
+        "{:<width$} {}, sp, {}",
+        inst_filter.name,
         inst_bits.get_x_c3_rd(),
-        inst_bits.get_ciw_addi4spn_imm()
+        inst_bits.get_ciw_addi4spn_imm(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ci_type_shift(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c_rs1(), // rd and rs1 overlap in compressed instructions
-        inst_bits.get_c_shamt()
+        inst_bits.get_c_shamt(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
 fn fmt_ca_type(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {
     format!(
-        "{} {}, {}",
-        inst_filter,
+        "{:<width$} {}, {}",
+        inst_filter.name,
         inst_bits.get_x_c3_rs1(),
-        inst_bits.get_x_c3_rd()
+        inst_bits.get_x_c3_rd(),
+        width = INSTRUCTION_NAME_WIDTH
     )
 }
 
