@@ -53,48 +53,48 @@ impl InstructionBits {
         (signed_bits << (32 - sign_extend_shift) >> (32 - mask_width)) as u32
     }
 
-    fn get_rd(&self) -> u32 {
+    fn get_idx_rd(&self) -> u32 {
         self.shift_and_mask(7, 5)
     }
 
-    fn get_rs1(&self) -> u32 {
+    fn get_idx_rs1(&self) -> u32 {
         self.shift_and_mask(15, 5)
     }
 
-    fn get_rs2(&self) -> u32 {
+    fn get_idx_rs2(&self) -> u32 {
         self.shift_and_mask(20, 5)
     }
 
-    fn get_rs3(&self) -> u32 {
+    fn get_idx_rs3(&self) -> u32 {
         self.shift_and_mask(27, 5)
     }
 
     pub fn get_x_rd(&self) -> &str {
-        INT_REGISTER_ABI_NAMES[self.get_rd() as usize]
+        INT_REGISTER_ABI_NAMES[self.get_idx_rd() as usize]
     }
 
     pub fn get_x_rs1(&self) -> &str {
-        INT_REGISTER_ABI_NAMES[self.get_rs1() as usize]
+        INT_REGISTER_ABI_NAMES[self.get_idx_rs1() as usize]
     }
 
     pub fn get_x_rs2(&self) -> &str {
-        INT_REGISTER_ABI_NAMES[self.get_rs2() as usize]
+        INT_REGISTER_ABI_NAMES[self.get_idx_rs2() as usize]
     }
 
     pub fn get_f_rd(&self) -> &str {
-        FP_REGISTER_ABI_NAMES[self.get_rd() as usize]
+        FP_REGISTER_ABI_NAMES[self.get_idx_rd() as usize]
     }
 
     pub fn get_f_rs1(&self) -> &str {
-        FP_REGISTER_ABI_NAMES[self.get_rs1() as usize]
+        FP_REGISTER_ABI_NAMES[self.get_idx_rs1() as usize]
     }
 
     pub fn get_f_rs2(&self) -> &str {
-        FP_REGISTER_ABI_NAMES[self.get_rs2() as usize]
+        FP_REGISTER_ABI_NAMES[self.get_idx_rs2() as usize]
     }
 
     pub fn get_f_rs3(&self) -> &str {
-        FP_REGISTER_ABI_NAMES[self.get_rs3() as usize]
+        FP_REGISTER_ABI_NAMES[self.get_idx_rs3() as usize]
     }
 
     pub fn get_i_imm(&self) -> i32 {
