@@ -1040,103 +1040,119 @@ pub fn gen_instructions(
         vec![]
     };
 
-    let i_inst_filters = vec![
-        // Integer-immediate
-        InstructionFilter::new("addi", inst::MASK_ADDI, inst::MATCH_ADDI, fmt_i_type),
-        InstructionFilter::new("slti", inst::MASK_SLTI, inst::MATCH_SLTI, fmt_i_type),
-        InstructionFilter::new("sltiu", inst::MASK_SLTIU, inst::MATCH_SLTIU, fmt_i_type),
-        InstructionFilter::new("ori", inst::MASK_ORI, inst::MATCH_ORI, fmt_i_type),
-        InstructionFilter::new("xori", inst::MASK_XORI, inst::MATCH_XORI, fmt_i_type),
-        InstructionFilter::new("andi", inst::MASK_ANDI, inst::MATCH_ANDI, fmt_i_type),
-        InstructionFilter::new("addiw", inst::MASK_ADDIW, inst::MATCH_ADDIW, fmt_i_type),
-        // Integer-immediate shift
-        // Note that while there are RV32-specific encodings for SLLI, SRLI, and SRAI, the RV64
-        // encodings match those instructions as well, since the only difference between those
-        // different XLEN settings is the most-significant bit of the 'shamt' field always being 0
-        // on RV32.
-        InstructionFilter::new("slli", inst::MASK_SLLI, inst::MATCH_SLLI, fmt_i_type_shift),
-        InstructionFilter::new("srli", inst::MASK_SRLI, inst::MATCH_SRLI, fmt_i_type_shift),
-        InstructionFilter::new("srai", inst::MASK_SRAI, inst::MATCH_SRAI, fmt_i_type_shift),
-        InstructionFilter::new(
-            "slliw",
-            inst::MASK_SLLIW,
-            inst::MATCH_SLLIW,
-            fmt_i_type_shift,
-        ),
-        InstructionFilter::new(
-            "srliw",
-            inst::MASK_SRLIW,
-            inst::MATCH_SRLIW,
-            fmt_i_type_shift,
-        ),
-        InstructionFilter::new(
-            "sraiw",
-            inst::MASK_SRAIW,
-            inst::MATCH_SRAIW,
-            fmt_i_type_shift,
-        ),
-        // Upper-immediate
-        InstructionFilter::new("lui", inst::MASK_LUI, inst::MATCH_LUI, fmt_u_type),
-        InstructionFilter::new("auipc", inst::MASK_AUIPC, inst::MATCH_AUIPC, fmt_u_type),
-        // Register-register
-        InstructionFilter::new("add", inst::MASK_ADD, inst::MATCH_ADD, fmt_r_type),
-        InstructionFilter::new("slt", inst::MASK_SLT, inst::MATCH_SLT, fmt_r_type),
-        InstructionFilter::new("sltu", inst::MASK_SLTU, inst::MATCH_SLTU, fmt_r_type),
-        InstructionFilter::new("and", inst::MASK_AND, inst::MATCH_AND, fmt_r_type),
-        InstructionFilter::new("or", inst::MASK_OR, inst::MATCH_OR, fmt_r_type),
-        InstructionFilter::new("xor", inst::MASK_XOR, inst::MATCH_XOR, fmt_r_type),
-        InstructionFilter::new("sll", inst::MASK_SLL, inst::MATCH_SLL, fmt_r_type),
-        InstructionFilter::new("srl", inst::MASK_SRL, inst::MATCH_SRL, fmt_r_type),
-        InstructionFilter::new("sub", inst::MASK_SUB, inst::MATCH_SUB, fmt_r_type),
-        InstructionFilter::new("sra", inst::MASK_SRA, inst::MATCH_SRA, fmt_r_type),
-        // Jumps
-        InstructionFilter::new("jal", inst::MASK_JAL, inst::MATCH_JAL, fmt_j_type),
-        InstructionFilter::new("jalr", inst::MASK_JALR, inst::MATCH_JALR, fmt_i_type),
-        // Branches
-        InstructionFilter::new("beq", inst::MASK_BEQ, inst::MATCH_BEQ, fmt_b_type),
-        InstructionFilter::new("bne", inst::MASK_BNE, inst::MATCH_BNE, fmt_b_type),
-        InstructionFilter::new("blt", inst::MASK_BLT, inst::MATCH_BLT, fmt_b_type),
-        InstructionFilter::new("bltu", inst::MASK_BLTU, inst::MATCH_BLTU, fmt_b_type),
-        InstructionFilter::new("bge", inst::MASK_BGE, inst::MATCH_BGE, fmt_b_type),
-        InstructionFilter::new("bgeu", inst::MASK_BGEU, inst::MATCH_BGEU, fmt_b_type),
-        // Loads
-        InstructionFilter::new("lb", inst::MASK_LB, inst::MATCH_LB, fmt_load),
-        InstructionFilter::new("lbu", inst::MASK_LBU, inst::MATCH_LBU, fmt_load),
-        InstructionFilter::new("lh", inst::MASK_LH, inst::MATCH_LH, fmt_load),
-        InstructionFilter::new("lhu", inst::MASK_LHU, inst::MATCH_LHU, fmt_load),
-        InstructionFilter::new("lw", inst::MASK_LW, inst::MATCH_LW, fmt_load),
-        InstructionFilter::new("lwu", inst::MASK_LWU, inst::MATCH_LWU, fmt_load),
-        InstructionFilter::new("ld", inst::MASK_LD, inst::MATCH_LD, fmt_load),
-        // Stores
-        InstructionFilter::new("sb", inst::MASK_SB, inst::MATCH_SB, fmt_store),
-        InstructionFilter::new("sh", inst::MASK_SH, inst::MATCH_SH, fmt_store),
-        InstructionFilter::new("sw", inst::MASK_SW, inst::MATCH_SW, fmt_store),
-        InstructionFilter::new("sd", inst::MASK_SD, inst::MATCH_SD, fmt_store),
-        // Fences
-        InstructionFilter::new("fence", inst::MASK_FENCE, inst::MATCH_FENCE, fmt_no_args),
-        // Zifencei extension
-        InstructionFilter::new(
-            "fence.i",
-            inst::MASK_FENCE_I,
-            inst::MATCH_FENCE_I,
-            fmt_no_args,
-        ),
-        // Environment calls & breakpoints
-        InstructionFilter::new("ecall", inst::MASK_ECALL, inst::MATCH_ECALL, fmt_no_args),
-        InstructionFilter::new("ebreak", inst::MASK_EBREAK, inst::MATCH_EBREAK, fmt_no_args),
-        // Privileged instructions
-        InstructionFilter::new("wfi", inst::MASK_WFI, inst::MATCH_WFI, fmt_no_args),
-        InstructionFilter::new("mret", inst::MASK_MRET, inst::MATCH_MRET, fmt_no_args),
-        InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
-        InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
-        // Control and status registers, Zicsr extension
-        InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
-        InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),
-        InstructionFilter::new("csrrc", inst::MASK_CSRRC, inst::MATCH_CSRRC, fmt_csr),
-        InstructionFilter::new("csrrwi", inst::MASK_CSRRWI, inst::MATCH_CSRRWI, fmt_csr_imm),
-        InstructionFilter::new("csrrsi", inst::MASK_CSRRSI, inst::MATCH_CSRRSI, fmt_csr_imm),
-        InstructionFilter::new("csrrci", inst::MASK_CSRRCI, inst::MATCH_CSRRCI, fmt_csr_imm),
-    ];
+    let i_inst_filters = {
+        let mut xlen_filters = match xlen {
+            Xlen::Rv32 => vec![],
+            Xlen::Rv64 => vec![
+                InstructionFilter::new("addiw", inst::MASK_ADDIW, inst::MATCH_ADDIW, fmt_i_type),
+                InstructionFilter::new(
+                    "slliw",
+                    inst::MASK_SLLIW,
+                    inst::MATCH_SLLIW,
+                    fmt_i_type_shift,
+                ),
+                InstructionFilter::new(
+                    "srliw",
+                    inst::MASK_SRLIW,
+                    inst::MATCH_SRLIW,
+                    fmt_i_type_shift,
+                ),
+                InstructionFilter::new(
+                    "sraiw",
+                    inst::MASK_SRAIW,
+                    inst::MATCH_SRAIW,
+                    fmt_i_type_shift,
+                ),
+                InstructionFilter::new("addw", inst::MASK_ADDW, inst::MATCH_ADDW, fmt_r_type),
+                InstructionFilter::new("subw", inst::MASK_SUBW, inst::MATCH_SUBW, fmt_r_type),
+                InstructionFilter::new("sllw", inst::MASK_SLLW, inst::MATCH_SLLW, fmt_r_type),
+                InstructionFilter::new("srlw", inst::MASK_SRLW, inst::MATCH_SRLW, fmt_r_type),
+                InstructionFilter::new("sraw", inst::MASK_SRAW, inst::MATCH_SRAW, fmt_r_type),
+                InstructionFilter::new("lwu", inst::MASK_LWU, inst::MATCH_LWU, fmt_load),
+                InstructionFilter::new("ld", inst::MASK_LD, inst::MATCH_LD, fmt_load),
+                InstructionFilter::new("sd", inst::MASK_SD, inst::MATCH_SD, fmt_store),
+            ],
+        };
+
+        let global_filters = vec![
+            // Integer-immediate
+            InstructionFilter::new("addi", inst::MASK_ADDI, inst::MATCH_ADDI, fmt_i_type),
+            InstructionFilter::new("slti", inst::MASK_SLTI, inst::MATCH_SLTI, fmt_i_type),
+            InstructionFilter::new("sltiu", inst::MASK_SLTIU, inst::MATCH_SLTIU, fmt_i_type),
+            InstructionFilter::new("ori", inst::MASK_ORI, inst::MATCH_ORI, fmt_i_type),
+            InstructionFilter::new("xori", inst::MASK_XORI, inst::MATCH_XORI, fmt_i_type),
+            InstructionFilter::new("andi", inst::MASK_ANDI, inst::MATCH_ANDI, fmt_i_type),
+            // Integer-immediate shift
+            // Note that while there are RV32-specific encodings for SLLI, SRLI, and SRAI, the RV64
+            // encodings match those instructions as well, since the only difference between those
+            // different XLEN settings is the most-significant bit of the 'shamt' field always
+            // being 0 on RV32.
+            InstructionFilter::new("slli", inst::MASK_SLLI, inst::MATCH_SLLI, fmt_i_type_shift),
+            InstructionFilter::new("srli", inst::MASK_SRLI, inst::MATCH_SRLI, fmt_i_type_shift),
+            InstructionFilter::new("srai", inst::MASK_SRAI, inst::MATCH_SRAI, fmt_i_type_shift),
+            // Upper-immediate
+            InstructionFilter::new("lui", inst::MASK_LUI, inst::MATCH_LUI, fmt_u_type),
+            InstructionFilter::new("auipc", inst::MASK_AUIPC, inst::MATCH_AUIPC, fmt_u_type),
+            // Register-register
+            InstructionFilter::new("add", inst::MASK_ADD, inst::MATCH_ADD, fmt_r_type),
+            InstructionFilter::new("slt", inst::MASK_SLT, inst::MATCH_SLT, fmt_r_type),
+            InstructionFilter::new("sltu", inst::MASK_SLTU, inst::MATCH_SLTU, fmt_r_type),
+            InstructionFilter::new("and", inst::MASK_AND, inst::MATCH_AND, fmt_r_type),
+            InstructionFilter::new("or", inst::MASK_OR, inst::MATCH_OR, fmt_r_type),
+            InstructionFilter::new("xor", inst::MASK_XOR, inst::MATCH_XOR, fmt_r_type),
+            InstructionFilter::new("sll", inst::MASK_SLL, inst::MATCH_SLL, fmt_r_type),
+            InstructionFilter::new("srl", inst::MASK_SRL, inst::MATCH_SRL, fmt_r_type),
+            InstructionFilter::new("sub", inst::MASK_SUB, inst::MATCH_SUB, fmt_r_type),
+            InstructionFilter::new("sra", inst::MASK_SRA, inst::MATCH_SRA, fmt_r_type),
+            // Jumps
+            InstructionFilter::new("jal", inst::MASK_JAL, inst::MATCH_JAL, fmt_j_type),
+            InstructionFilter::new("jalr", inst::MASK_JALR, inst::MATCH_JALR, fmt_i_type),
+            // Branches
+            InstructionFilter::new("beq", inst::MASK_BEQ, inst::MATCH_BEQ, fmt_b_type),
+            InstructionFilter::new("bne", inst::MASK_BNE, inst::MATCH_BNE, fmt_b_type),
+            InstructionFilter::new("blt", inst::MASK_BLT, inst::MATCH_BLT, fmt_b_type),
+            InstructionFilter::new("bltu", inst::MASK_BLTU, inst::MATCH_BLTU, fmt_b_type),
+            InstructionFilter::new("bge", inst::MASK_BGE, inst::MATCH_BGE, fmt_b_type),
+            InstructionFilter::new("bgeu", inst::MASK_BGEU, inst::MATCH_BGEU, fmt_b_type),
+            // Loads
+            InstructionFilter::new("lb", inst::MASK_LB, inst::MATCH_LB, fmt_load),
+            InstructionFilter::new("lbu", inst::MASK_LBU, inst::MATCH_LBU, fmt_load),
+            InstructionFilter::new("lh", inst::MASK_LH, inst::MATCH_LH, fmt_load),
+            InstructionFilter::new("lhu", inst::MASK_LHU, inst::MATCH_LHU, fmt_load),
+            InstructionFilter::new("lw", inst::MASK_LW, inst::MATCH_LW, fmt_load),
+            // Stores
+            InstructionFilter::new("sb", inst::MASK_SB, inst::MATCH_SB, fmt_store),
+            InstructionFilter::new("sh", inst::MASK_SH, inst::MATCH_SH, fmt_store),
+            InstructionFilter::new("sw", inst::MASK_SW, inst::MATCH_SW, fmt_store),
+            // Fences
+            InstructionFilter::new("fence", inst::MASK_FENCE, inst::MATCH_FENCE, fmt_no_args),
+            // Zifencei extension
+            InstructionFilter::new(
+                "fence.i",
+                inst::MASK_FENCE_I,
+                inst::MATCH_FENCE_I,
+                fmt_no_args,
+            ),
+            // Environment calls & breakpoints
+            InstructionFilter::new("ecall", inst::MASK_ECALL, inst::MATCH_ECALL, fmt_no_args),
+            InstructionFilter::new("ebreak", inst::MASK_EBREAK, inst::MATCH_EBREAK, fmt_no_args),
+            // Privileged instructions
+            InstructionFilter::new("wfi", inst::MASK_WFI, inst::MATCH_WFI, fmt_no_args),
+            InstructionFilter::new("mret", inst::MASK_MRET, inst::MATCH_MRET, fmt_no_args),
+            InstructionFilter::new("sret", inst::MASK_SRET, inst::MATCH_SRET, fmt_no_args),
+            InstructionFilter::new("uret", inst::MASK_URET, inst::MATCH_URET, fmt_no_args),
+            // Control and status registers, Zicsr extension
+            InstructionFilter::new("csrrw", inst::MASK_CSRRW, inst::MATCH_CSRRW, fmt_csr),
+            InstructionFilter::new("csrrs", inst::MASK_CSRRS, inst::MATCH_CSRRS, fmt_csr),
+            InstructionFilter::new("csrrc", inst::MASK_CSRRC, inst::MATCH_CSRRC, fmt_csr),
+            InstructionFilter::new("csrrwi", inst::MASK_CSRRWI, inst::MATCH_CSRRWI, fmt_csr_imm),
+            InstructionFilter::new("csrrsi", inst::MASK_CSRRSI, inst::MATCH_CSRRSI, fmt_csr_imm),
+            InstructionFilter::new("csrrci", inst::MASK_CSRRCI, inst::MATCH_CSRRCI, fmt_csr_imm),
+        ];
+
+        xlen_filters.extend(global_filters);
+        xlen_filters
+    };
 
     // M extension, integer multiplication and division
     let m_inst_filters = if isa_extensions.has_m() {
