@@ -4,7 +4,12 @@ version = "0.1.0"
 authors = ["Tynan McAuley"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bench]]
+name = "dasm"
+harness = false
 
 [dependencies]
 nom = "6"
+
+[dev-dependencies]
+criterion = "0.3"
