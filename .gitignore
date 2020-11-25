@@ -1,2 +1,4 @@
 /target
 Cargo.lock
+/inputs/sim-logs-dasm/
+/inputs/sim-logs-no-dasm/
