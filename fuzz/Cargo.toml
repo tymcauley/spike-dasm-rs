@@ -1,0 +1,37 @@
+[package]
+name = "spike-dasm-rs-fuzz"
+version = "0.0.0"
+authors = ["Automatically generated"]
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.3"
+
+[dependencies.spike-dasm-rs]
+path = ".."
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_parser"
+path = "fuzz_targets/fuzz_parser.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_instruction_bits"
+path = "fuzz_targets/fuzz_instruction_bits.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_disasm"
+path = "fuzz_targets/fuzz_disasm.rs"
+test = false
+doc = false
