@@ -24,6 +24,20 @@ For a larger test over more inputs, run `./test_sim_logs.sh`.
 
 Run `cargo bench` to run benchmarks.
 
+## Fuzz
+
+### Setup
+
+Install a nightly Rust toolchain (`rustup install nightly`) and [`cargo
+fuzz`](https://github.com/rust-fuzz/cargo-fuzz) (`cargo install -f
+cargo-fuzz`).
+
+### Run
+
+Run `cargo +nightly fuzz list` to see all available fuzzing targets.
+
+Run `cargo +nightly fuzz run <target>` to run one of the fuzzing targets.
+
 ## How to get RISC-V opcodes
 
 ```
