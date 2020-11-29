@@ -1,14 +1,15 @@
 #!/bin/bash -e
 
-# 
+# Check that 'spike-dasm-rs' produces the same results as 'spike-dasm' for a
+# number of RISC-V simulations.
 
 SCRIPT=./target/release/spike-dasm-rs
 IN_DIR=inputs/sim-logs-no-dasm
 GOLDEN_DIR=inputs/sim-logs-dasm
 OUT_DIR=tmp-dasm
 
-[[ ! -d "$IN_DIR" ]] && echo "Couldn't find input directory '$IN_DIR'"
-[[ ! -d "$GOLDEN_DIR" ]] && echo "Couldn't find golden directory '$GOLDEN_DIR'"
+[[ ! -d "$IN_DIR" ]] && echo "Couldn't find input directory '$IN_DIR'" && exit 1
+[[ ! -d "$GOLDEN_DIR" ]] && echo "Couldn't find golden directory '$GOLDEN_DIR'" && exit 1
 
 [[ -d "$OUT_DIR" ]] && rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
