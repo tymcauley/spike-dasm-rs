@@ -1,4 +1,7 @@
-# spike-dasm-rs
+# spike-dasm-rs &emsp; [![ci-status]][ci-jobs]
+
+[ci-status]: https://github.com/tymcauley/spike-dasm-rs/workflows/CI/badge.svg
+[ci-jobs]: https://github.com/tymcauley/spike-dasm-rs/actions?query=branch%3Amaster
 
 Rust implementation of [spike's](https://github.com/riscv/riscv-isa-sim) RISC-V
 disassembler, `spike-dasm`.
