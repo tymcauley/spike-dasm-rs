@@ -7,7 +7,7 @@ use spike_dasm_rs::disasm::Disassembler;
 use spike_dasm_rs::instruction;
 use spike_dasm_rs::{Extensions, Xlen};
 
-const INPUT_DIR: &'static str = "inputs/sim-logs-no-dasm";
+const INPUT_DIR: &str = "inputs/sim-logs-no-dasm";
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     // Read input file to string.

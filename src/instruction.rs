@@ -536,7 +536,7 @@ fn fmt_store(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> Str
 }
 
 fn fmt_no_args(inst_filter: &InstructionFilter, _inst_bits: InstructionBits) -> String {
-    format!("{}", inst_filter.name)
+    inst_filter.name.to_string()
 }
 
 fn fmt_rs1_rs2(inst_filter: &InstructionFilter, inst_bits: InstructionBits) -> String {

@@ -6,7 +6,7 @@ use nom::{
     IResult,
 };
 
-const SIGNPOST: &'static str = "DASM(";
+const SIGNPOST: &str = "DASM(";
 
 fn is_hex_digit(c: char) -> bool {
     c.is_digit(16)
