@@ -1,0 +1,75 @@
+name: CI
+
+on: push
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test-stable:
+    name: Test (stable)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        components: rustfmt, clippy
+    - uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-targets
+        name: clippy stable
+    - run: cd inputs && tar xf sim-logs.tar.xz
+    - run: cargo build
+    - run: cargo test
+    - run: cargo fmt --all -- --check
+    - run: ./test_sim_logs.sh
+    - run: cargo bench
+
+  test-beta:
+    name: Test (beta)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: beta
+        components: rustfmt, clippy
+        override: true
+    - uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-targets
+        name: clippy beta
+    - run: cd inputs && tar xf sim-logs.tar.xz
+    - run: cargo build
+    - run: cargo test
+    - run: cargo fmt --all -- --check
+    - run: ./test_sim_logs.sh
+    - run: cargo bench
+  
+  test-nightly:
+    name: Test (nightly)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: rustfmt, clippy
+        override: true
+    - uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-targets
+        name: clippy nightly
+    - run: cd inputs && tar xf sim-logs.tar.xz
+    - run: cargo build
+    - run: cargo test
+    - run: cargo fmt --all -- --check
+    - run: ./test_sim_logs.sh
+    - run: cargo bench
